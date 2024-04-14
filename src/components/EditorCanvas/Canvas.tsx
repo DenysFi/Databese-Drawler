@@ -1,21 +1,17 @@
-import { tableDefaultColor } from "@/Constants/constants";
+import { addTable } from "@/store/tablesSlice";
 import Table from "./Table";
+import { useAppDispatch, useAppSelector } from "@/redux-hooks";
+import { Button } from "@douyinfe/semi-ui";
 
 const Canvas = () => {
-    const tables = [
-        {
-            id: 0,
-            name: 'test',
-            x: 10,
-            y: 20,
-            fields: [
-                { name: 'id', type: 'INT' },
-                { name: 'test', type: 'CHAR' },
-            ],
-            color: tableDefaultColor
-        }
-    ]
-    return (
+    const { tables } = useAppSelector(state => state.tables)
+    const dispatch = useAppDispatch();
+    function onClik() {
+        dispatch(addTable({}))
+    }
+    return (<>
+        <Button onClick={onClik} />
+
         <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" >
             <defs>
                 <pattern
@@ -41,6 +37,7 @@ const Canvas = () => {
                 {tables.map((f, i) => <Table key={f.id} index={i} tableData={f} />)}
             </g>
         </svg>
+    </>
     );
 };
 
