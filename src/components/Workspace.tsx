@@ -5,9 +5,9 @@ import EditorSideBar from "./EditorSidebar/EditorSideBar";
 const Workspace = () => {
     return (
         <div className='app-wrapper h-[100vh] overflow-hidden theme'>
-            <ControllPanel />
+            {/* <ControllPanel /> */}
             <div className='flex h-full overflow-hidden'>
-                <EditorSideBar />
+                {/* <EditorSideBar /> */}
                 <div className='relative flex grow '>
                     <Canvas />
                 </div>

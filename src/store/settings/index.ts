@@ -2,7 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     mode: 'light',
-    showGrid: true
+    showGrid: true,
+    showFieldSummary: true
 }
 export const settingsSlice = createSlice(
     {
