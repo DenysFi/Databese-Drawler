@@ -13,11 +13,11 @@ export interface ITableField {
     type: string
     details: ITableFieldDetails
 }
+
 interface ITableFieldDetails {
     nulable: boolean,
     primary: boolean,
     unique: boolean,
     defaultValue: string,
     autoinc: boolean
-
 }

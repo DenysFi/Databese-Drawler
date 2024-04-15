@@ -21,7 +21,7 @@ const Canvas: FC = () => {
         dx: 0,
         dy: 0
     });
-    const [cursor, setCursor] = useState('auto');
+    const [cursor, setCursor] = useState<string>('auto');
     const canvasRef = useRef<SVGSVGElement>(null);
     const { tables } = useAppSelector(state => state.tables)
     const { selected } = useAppSelector(state => state.selected)
@@ -80,14 +80,18 @@ const Canvas: FC = () => {
         })
 
     }
-    console.log(transform.scale);
+
     useEffect(() => {
+        function onMouseWheel(event: WheelEvent) {
+            dispatch(setScale(event.deltaY))
+        }
+
         const canvas = canvasRef.current;
         if (!canvas) return;
 
-        canvas.addEventListener("wheel", (event) => {
-            dispatch(setScale(event.deltaY))
-        });
+        canvas.addEventListener("wheel", onMouseWheel);
+
+        return () => canvas.removeEventListener("wheel", onMouseWheel)
     }, [dispatch])
     return (<>
         <Button onClick={onClik} />
@@ -131,7 +135,7 @@ const Canvas: FC = () => {
                 }}
                 id="diagram"
             >
-                {tables.map((f, i) => <Table onMouseDownOnElement={onMouseDownOnElement} key={f.id} index={i} tableData={f} />)}
+                {tables.map((f) => <Table onMouseDownOnElement={onMouseDownOnElement} key={f.id} tableData={f} />)}
             </g>
         </svg>
     </>

@@ -2,7 +2,6 @@ import { tabelHeaderHeight, tableDefaultColor, tableDefaultRowHeight, tableDefau
 import { objectType } from "@/Constants/enums";
 import { ITableField, ITable as TableType } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
-import { resetSelected, setSelected } from "@/store/selected";
 import { removeField, removeTable } from "@/store/tables";
 import {
     IconDeleteStroked,
@@ -12,17 +11,17 @@ import {
 } from "@douyinfe/semi-icons";
 import { Button, Popover, Toast } from "@douyinfe/semi-ui";
 import { FC, useState, MouseEvent } from "react";
+
 interface ITable {
-    index: number,
     tableData: TableType,
     onMouseDownOnElement: (event: MouseEvent<SVGForeignObjectElement>, id: number, type: objectType) => void;
 }
-const Table: FC<ITable> = ({ index, tableData, onMouseDownOnElement }) => {
+const Table: FC<ITable> = ({ tableData, onMouseDownOnElement }) => {
     const dispatch = useAppDispatch();
     const { mode } = useAppSelector(state => state.settings)
     const { selected } = useAppSelector(state => state.selected);
+    const [hoveredField, setHoveredField] = useState(-1)
     const totalTabelHeight = (tableData.fields.length * tableDefaultRowHeight) + tabelHeaderHeight + 3;
-    const [hoveredField, setHoveredField] = useState<number>(-1)
     return (
         <foreignObject
             x={tableData.x}

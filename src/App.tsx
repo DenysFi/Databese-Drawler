@@ -1,6 +1,6 @@
 import '@/styles/style.scss'
-
 import Workspace from './components/Workspace'
+
 function App() {
   return (
     <Workspace />

@@ -1,5 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+interface ISettings {
+    mode: string,
+    showGrid: boolean
+    showFieldSummary: boolean
+}
 const initialState = {
     mode: 'light',
     showGrid: true,
