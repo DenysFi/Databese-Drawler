@@ -1,36 +1,44 @@
 import { tabelHeaderHeight, tableDefaultColor, tableDefaultRowHeight, tableDefaultWidth } from "@/Constants/constants";
+import { objectType } from "@/Constants/enums";
 import { ITableField, ITable as TableType } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
-import { removeField, removeTable } from "@/store/tablesSlice";
+import { resetSelected, setSelected } from "@/store/selected";
+import { removeField, removeTable } from "@/store/tables";
 import {
+    IconDeleteStroked,
     IconEdit,
     IconMinus,
-    IconMore,
-    IconDeleteStroked
+    IconMore
 } from "@douyinfe/semi-icons";
 import { Button, Popover, Toast } from "@douyinfe/semi-ui";
-import { FC, useState } from "react";
+import { FC, useState, MouseEvent } from "react";
 interface ITable {
     index: number,
-    tableData: TableType
+    tableData: TableType,
+    onMouseDownOnElement: (event: MouseEvent<SVGForeignObjectElement>, id: number, type: objectType) => void;
 }
-const Table: FC<ITable> = ({ index, tableData }) => {
-    const { mode } = useAppSelector(state => state.settings)
+const Table: FC<ITable> = ({ index, tableData, onMouseDownOnElement }) => {
     const dispatch = useAppDispatch();
+    const { mode } = useAppSelector(state => state.settings)
+    const { selected } = useAppSelector(state => state.selected);
     const totalTabelHeight = (tableData.fields.length * tableDefaultRowHeight) + tabelHeaderHeight + 3;
     const [hoveredField, setHoveredField] = useState<number>(-1)
-
     return (
         <foreignObject
             x={tableData.x}
             y={tableData.y}
             width={tableDefaultWidth}
             height={totalTabelHeight}
+            onMouseDown={(e) => {
+                onMouseDownOnElement(e, tableData.id, objectType.Table);
+            }}
             className="group drop-shadow-lg rounded-md cursor-move group select-none"
         >
             <article
-                className={`border-2 border-zinc-500 w-full h-full overflow-hidden rounded table-theme  hover:border-dashed hover:border-blue-500 
-            ${mode === "light" ? "bg-zinc-100 text-zinc-800" : "bg-zinc-800 text-zinc-200"}`}>
+                className={`border-2 ${!(selected.id === tableData.id) && 'border-zinc-500'} w-full h-full overflow-hidden rounded table-theme  hover:border-dashed hover:border-blue-500 
+            ${mode === "light" ? "bg-zinc-100 text-zinc-800" : "bg-zinc-800 text-zinc-200"}`}
+                style={{ borderColor: selected.id === tableData.id && tableData.color || '' }}
+            >
                 <div className="w-full h-[10px]" style={{ backgroundColor: tableData.color }}></div>
                 <div className={`h-[36px] px-[6px] border-b border-gray-400 flex justify-between ${mode === "light" ? "bg-zinc-200" : "bg-zinc-900"} items-center `}>
                     <div>

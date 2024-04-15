@@ -11,6 +11,6 @@
 }
 
 .popover-theme {
-    background-color: rgba(var(--semi-white), 1);
+    background-color: var(--semi-color-bg-1);
     color: var(--semi-color-text-0);
 }

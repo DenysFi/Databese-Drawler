@@ -1,10 +1,14 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import settingsSlice from "./settingsSlice";
-import tablesSlice from "./tablesSlice";
+import settingsSlice from "./settings";
+import tablesSlice from "./tables";
+import selected from "./selected";
+import transform from "./transform";
 
 const rootReducer = combineReducers({
     settings: settingsSlice,
-    tables: tablesSlice
+    tables: tablesSlice,
+    selected: selected,
+    transform: transform
 })
 export const store = configureStore(
     {

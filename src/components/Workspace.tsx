@@ -1,12 +1,7 @@
 import Canvas from "./EditorCanvas/Canvas";
 import ControllPanel from "./EditorHeader/ControllPanel";
 import EditorSideBar from "./EditorSidebar/EditorSideBar";
-// const body = document.body;
-// if (body.hasAttribute('theme-mode')) {
-//     body.removeAttribute('theme-mode');
-// } else {
-//     body.setAttribute('theme-mode', 'dark');
-// }
+
 const Workspace = () => {
     return (
         <div className='app-wrapper h-[100vh] overflow-hidden theme'>

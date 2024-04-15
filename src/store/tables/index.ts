@@ -28,7 +28,7 @@ const tablesSlice = createSlice({
     name: 'tables',
     initialState,
     reducers: {
-        addTable(state, action) {
+        addTable(state) {
             const newTable = {
                 id: state.tables.length,
                 name: `Table_${state.tables.length}`,
@@ -47,7 +47,9 @@ const tablesSlice = createSlice({
             state.tables = state.tables.filter(tb => tb.id !== action.payload)
         },
         updateTable(state, action) {
-
+            const { id, ...values } = action.payload;
+            console.log(id, values);
+            state.tables[id] = { ...state.tables[id], ...values };
         },
         updateField(state, action) {
 
@@ -57,7 +59,7 @@ const tablesSlice = createSlice({
         },
         removeField(state, action) {
             const { tid, fid } = action.payload;
-            state.tables[tid].fields = state.tables[tid].fields.filter((f, i) => i !== fid)
+            state.tables[tid].fields = state.tables[tid].fields.filter((_, i) => i !== fid)
         },
     }
 })
