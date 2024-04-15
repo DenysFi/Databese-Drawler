@@ -28,13 +28,14 @@ const tablesSlice = createSlice({
     name: 'tables',
     initialState,
     reducers: {
-        addTable(state) {
+        addTable(state, action) {
+            const { scale, x, y } = action.payload
             const newTable = {
                 id: state.tables.length,
                 name: `Table_${state.tables.length}`,
                 comment: '',
-                x: 10,
-                y: 10,
+                x: (20 - x) * scale,
+                y: (20 - y) * scale,
                 indices: '',
                 fields: [
                     { name: 'id', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
