@@ -2,7 +2,6 @@ import { tabelHeaderHeight, tableDefaultColor, tableDefaultRowHeight, tableDefau
 import { objectType } from "@/Constants/enums";
 import { ITableField, ITable as TableType } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
-import { resetSelected, setSelected } from "@/store/selected";
 import { removeField, removeTable } from "@/store/tables";
 import {
     IconDeleteStroked,
@@ -12,17 +11,17 @@ import {
 } from "@douyinfe/semi-icons";
 import { Button, Popover, Toast } from "@douyinfe/semi-ui";
 import { FC, useState, MouseEvent } from "react";
+
 interface ITable {
-    index: number,
     tableData: TableType,
     onMouseDownOnElement: (event: MouseEvent<SVGForeignObjectElement>, id: number, type: objectType) => void;
 }
-const Table: FC<ITable> = ({ index, tableData, onMouseDownOnElement }) => {
+const Table: FC<ITable> = ({ tableData, onMouseDownOnElement }) => {
     const dispatch = useAppDispatch();
     const { mode } = useAppSelector(state => state.settings)
     const { selected } = useAppSelector(state => state.selected);
+    const [hoveredField, setHoveredField] = useState(-1)
     const totalTabelHeight = (tableData.fields.length * tableDefaultRowHeight) + tabelHeaderHeight + 3;
-    const [hoveredField, setHoveredField] = useState<number>(-1)
     return (
         <foreignObject
             x={tableData.x}
@@ -91,10 +90,8 @@ const Table: FC<ITable> = ({ index, tableData, onMouseDownOnElement }) => {
                                 }}
                             />
                         </Popover>
-
                     </div>
                 </div>
-
                 {
                     tableData.fields.map((f, i) => {
                         return (
@@ -102,17 +99,16 @@ const Table: FC<ITable> = ({ index, tableData, onMouseDownOnElement }) => {
                         )
                     })
                 }
-
             </article>
         </foreignObject>
     );
-    function field(f: ITableField, i: number) {
 
+    function field(f: ITableField, i: number) {
         return (
             <div
                 key={i}
-                className={`h-[${tableDefaultRowHeight}px] px-[6px] py-[5px] flex justify-between items-center  ${i === tableData.fields.length - 1 ? '' : 'border-b border-gray-400'} `}
-
+                className={`h-[${tableDefaultRowHeight}px] px-[6px] py-[5px] flex justify-between items-center  
+                ${i === tableData.fields.length - 1 ? '' : 'border-b border-gray-400'} `}
                 onMouseEnter={() => setHoveredField(i)}
                 onMouseLeave={() => setHoveredField(-1)}
             >
@@ -120,7 +116,6 @@ const Table: FC<ITable> = ({ index, tableData, onMouseDownOnElement }) => {
                     <Button className={`rounded-full w-[9px] h-[9px] p-0 `} style={{ backgroundColor: tableDefaultColor }} ></Button>
                     <p className={`${hoveredField === i && 'opacity-[0.7]' || ''}`}>{f.name}</p>
                 </div>
-
                 {
                     hoveredField === i ? <Button
                         icon={<IconMinus />}
@@ -129,10 +124,8 @@ const Table: FC<ITable> = ({ index, tableData, onMouseDownOnElement }) => {
                         type="danger"
                         size="small"
                         onClick={() => dispatch(removeField({ tid: tableData.id, fid: i }))}
-                    />
-                        : <span className=" opacity-[0.7]">{f.type}</span>
+                    /> : <span className=" opacity-[0.7]">{f.type}</span>
                 }
-
             </div>
         )
     }
