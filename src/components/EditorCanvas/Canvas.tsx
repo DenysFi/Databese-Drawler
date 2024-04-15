@@ -1,11 +1,11 @@
-import { useAppDispatch, useAppSelector } from "@/redux-hooks";
-import { addTable, updateTable } from "@/store/tables";
-import { Button } from "@douyinfe/semi-ui";
-import Table from "./Table";
-import { FC, MouseEvent, useEffect, useRef, useState } from "react";
 import { objectType } from "@/Constants/enums";
+import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setSelected } from "@/store/selected";
+import { addTable, updateTable } from "@/store/tables";
 import { setScale, setTransform } from "@/store/transform";
+import { Button } from "@douyinfe/semi-ui";
+import { FC, MouseEvent, useEffect, useRef, useState } from "react";
+import Table from "./Table";
 
 const Canvas: FC = () => {
     const dispatch = useAppDispatch();

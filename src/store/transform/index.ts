@@ -1,5 +1,5 @@
 import { scaleMinimum } from "@/Constants/constants";
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice } from "@reduxjs/toolkit";
 
 interface Itransform {
     transform: {
