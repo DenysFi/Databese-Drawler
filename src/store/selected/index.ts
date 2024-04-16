@@ -7,7 +7,6 @@ interface ISelected {
         element: objectType
     }
 }
-
 interface ISetSelected {
     payload: Partial<ISelected>
 }
