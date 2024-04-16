@@ -2,9 +2,9 @@ import { objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setSelected } from "@/store/selected";
 import { addTable, updateTable } from "@/store/tables";
-import { setScale, setTransform } from "@/store/transform";
+import { setPan, setScale, setTransform } from "@/store/transform";
 import { Button } from "@douyinfe/semi-ui";
-import { FC, MouseEvent, useEffect, useRef, useState } from "react";
+import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import Table from "./Table";
 
 const Canvas: FC = () => {
@@ -26,14 +26,13 @@ const Canvas: FC = () => {
     const canvasRef = useRef<SVGSVGElement>(null);
     const { tables } = useAppSelector(state => state.tables)
     const { selected } = useAppSelector(state => state.selected)
-    const { transform } = useAppSelector(state => state.transform)
+    const { scale, pan } = useAppSelector(state => state.transform)
 
-    console.log(tables);
     function onMouseDownOnElement(event: MouseEvent<SVGForeignObjectElement>, id: number, type: objectType) {
         const table = tables.find(t => t.id === id)
         setOffset({
-            x: event.clientX / transform.scale - table!.x,
-            y: event.clientY / transform.scale - table!.y
+            x: event.clientX / scale - table!.x,
+            y: event.clientY / scale - table!.y
         })
         setDragging({
             id,
@@ -43,21 +42,22 @@ const Canvas: FC = () => {
     }
 
     function onClik() {
-        dispatch(addTable({ scale: transform.scale, x: transform.pan.x, y: transform.pan.y }))
+        dispatch(addTable({ scale: scale, x: pan.x, y: pan.y }))
     }
 
     function onMouseMove(event: MouseEvent<SVGSVGElement>) {
         if (dragging.id >= 0 && dragging.element === objectType.Table) {
-            const x = event.clientX / transform.scale - offset.x,
-                y = event.clientY / transform.scale - offset.y;
+            const x = event.clientX / scale - offset.x,
+                y = event.clientY / scale - offset.y;
             dispatch(updateTable({ id: selected.id, x, y }))
         } else if (panning.isPanning && (dragging.id === -1 || dragging.element === objectType.None)) {
-            dispatch(setTransform({
-                pan: {
+            dispatch(setPan(
+                {
                     x: (event.clientX - panning.dx),
                     y: (event.clientY - panning.dy),
                 }
-            }))
+            ))
+
             setCursor('grabbing')
         }
     }
@@ -78,8 +78,8 @@ const Canvas: FC = () => {
     function onMouseDown(e: MouseEvent) {
         setPanning({
             isPanning: true,
-            dx: e.clientX - transform.pan.x,
-            dy: e.clientY - transform.pan.y
+            dx: e.clientX - pan.x,
+            dy: e.clientY - pan.y
         })
     }
 
@@ -130,7 +130,7 @@ const Canvas: FC = () => {
             <rect fill='url(#canvas-bg)' width={'100%'} height={'100%'}></rect>
             <g
                 style={{
-                    transform: `translate(${transform.pan.x}px, ${transform.pan.y}px) scale(${transform.scale})`,
+                    transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
                 }}
                 id="diagram"
             >

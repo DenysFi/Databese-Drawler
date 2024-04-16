@@ -8,7 +8,7 @@ interface ISelected {
     }
 }
 interface ISetSelected {
-    payload: Partial<ISelected>
+    payload: Partial<ISelected> & { id: number, element: objectType }
 }
 
 const initialState: ISelected = {

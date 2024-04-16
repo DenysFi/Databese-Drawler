@@ -2,42 +2,40 @@ import { scaleMinimum } from "@/Constants/constants";
 import { createSlice } from "@reduxjs/toolkit";
 
 interface Itransform {
-    transform: {
-        pan: { x: number, y: number }
-        scale: number
-    }
+    pan: { x: number, y: number }
+    scale: number
 }
 
 interface ISetScaleAction {
     payload: number
 }
 
-interface ISetTransformAction {
-    payload: Partial<Itransform>,
+interface ISetPanAction {
+    payload: { x: number, y: number },
 }
 
 const initialState: Itransform = {
-    transform: {
-        pan: { x: 0, y: 0 },
-        scale: 1
-    }
+    pan: { x: 0, y: 0 },
+    scale: 1
 }
 
 const transformSlice = createSlice({
     name: 'transform',
     initialState,
     reducers: {
-        setTransform(state, { payload }: Partial<ISetTransformAction>) {
-            state.transform = { ...state.transform, ...payload };
-        },
+
         setScale(state, action: ISetScaleAction) {
-            const scale = state.transform.scale;
+            const scale = state.scale;
             const newScale = action.payload < 0 ? scale * 1.05 : scale / 1.05;
             if (newScale < scaleMinimum) return;
-            state.transform.scale = newScale;
+            state.scale = newScale;
+        },
+        setPan(state, { payload }: ISetPanAction) {
+            const { x, y } = payload
+            state.pan = { x, y }
         }
     }
 })
 
 export default transformSlice.reducer;
-export const { setTransform, setScale } = transformSlice.actions
+export const { setScale, setPan } = transformSlice.actions
