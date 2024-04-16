@@ -23,7 +23,7 @@ interface IRemoveTableAction {
 }
 
 interface IUpdateTableAction {
-    payload: Partial<ITableField> & { id: number },
+    payload: Partial<ITableField> & { id: number, x: number, y: number },
 }
 
 const initialState: ITables = {
@@ -65,7 +65,6 @@ const tablesSlice = createSlice({
                 ],
                 color: tableDefaultColor
             }
-            console.log(newTable);
             state.uniqueId += 1;
             state.tables.push(newTable);
         },
@@ -74,7 +73,7 @@ const tablesSlice = createSlice({
         },
         updateTable(state, { payload }: IUpdateTableAction) {
             const { id, ...values } = payload;
-            state.tables[id] = { ...state.tables[id], ...values };
+            state.tables = state.tables.map(t => t.id === id ? { ...t, ...values } : t);
         },
         updateField(state, action) {
 
@@ -84,7 +83,7 @@ const tablesSlice = createSlice({
         },
         removeField(state, action: IRemoveTableAction) {
             const { tid, fid } = action.payload;
-            state.tables[tid].fields = state.tables[tid].fields.filter((_, i) => i !== fid)
+            state.tables = state.tables.map(t => t.id === tid ? { ...t, fields: t.fields.filter((_, i) => i !== fid) } : t)
         },
     }
 })

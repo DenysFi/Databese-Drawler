@@ -2,6 +2,7 @@ import { tabelHeaderHeight, tableDefaultColor, tableDefaultRowHeight, tableDefau
 import { objectType } from "@/Constants/enums";
 import { ITableField, ITable as TableType } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
+import { nullSelected } from "@/store/selected";
 import { removeField, removeTable } from "@/store/tables";
 import {
     IconDeleteStroked,
@@ -123,7 +124,10 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement }) => {
                         theme="solid"
                         type="danger"
                         size="small"
-                        onClick={() => dispatch(removeField({ tid: tableData.id, fid: i }))}
+                        onClick={() => {
+                            dispatch(removeField({ tid: tableData.id, fid: i }))
+                            dispatch(nullSelected())
+                        }}
                     /> : <span className=" opacity-[0.7]">{f.type}</span>
                 }
             </div>
