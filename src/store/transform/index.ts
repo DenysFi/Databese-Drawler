@@ -18,15 +18,14 @@ const initialState: Itransform = {
     pan: { x: 0, y: 0 },
     scale: 1
 }
-
+const scaleStep = 1.05;
 const transformSlice = createSlice({
     name: 'transform',
     initialState,
     reducers: {
-
         setScale(state, action: ISetScaleAction) {
             const scale = state.scale;
-            const newScale = action.payload < 0 ? scale * 1.05 : scale / 1.05;
+            const newScale = action.payload < 0 ? scale * scaleStep : scale / scaleStep;
             if (newScale < scaleMinimum) return;
             state.scale = newScale;
         },

@@ -20,12 +20,11 @@ const Relation: FC<IRelation> = ({ data }) => {
         y1: 0,
         y2: 0
     })
-    const [fromText, toText] = getRelationType(data.connectionName)
+    const [fromText, toText] = getRelationType(data.connectionName);
     useEffect(() => {
         if (!relationRef.current) return;
 
         const totalLength = relationRef.current.getTotalLength();
-        console.log(totalLength);
         const coord1 = relationRef.current.getPointAtLength(32);
         const coord2 = relationRef.current.getPointAtLength(totalLength - 32);
 
@@ -38,9 +37,12 @@ const Relation: FC<IRelation> = ({ data }) => {
     }, [tables])
 
     return (
-        <g className="select-none">
+        <g
+            className="select-none group hover:cursor-pointer"
+        >
             <path
                 ref={relationRef}
+                className="group-hover:stroke-sky-700"
                 d={calcPath({
                     width: tableDefaultWidth,
                     x1: table1.x,
@@ -48,9 +50,9 @@ const Relation: FC<IRelation> = ({ data }) => {
                     y1: table1.y + tableHeaderHeight + ((data.startTableField * tableDefaultRowHeight) + tableDefaultRowHeight) - tableDefaultRowHeight / 2,
                     y2: table2.y + tableHeaderHeight + ((data.endTableField * tableDefaultRowHeight) + tableDefaultRowHeight) - tableDefaultRowHeight / 2
                 })} strokeWidth='2px' stroke="gray" fill="none" />
-            <circle cx={circlesCoords.x1} cy={circlesCoords.y1} r={circleRadius} stroke="none" fill="gray" />
+            <circle className="group-hover:fill-sky-700" cx={circlesCoords.x1} cy={circlesCoords.y1} r={circleRadius} stroke="none" fill="gray" />
             <text x={circlesCoords.x1} y={circlesCoords.y1} fill="white" textAnchor="middle" dominantBaseline='middle'>{fromText}</text>
-            <circle cx={circlesCoords.x2} cy={circlesCoords.y2} r={circleRadius} stroke="none" fill="gray" />
+            <circle className="group-hover:fill-sky-700" cx={circlesCoords.x2} cy={circlesCoords.y2} r={circleRadius} stroke="none" fill="gray" />
             <text x={circlesCoords.x2} y={circlesCoords.y2} fill="white" textAnchor="middle" dominantBaseline='middle'>{toText}</text>
         </g>
     );
@@ -58,15 +60,14 @@ const Relation: FC<IRelation> = ({ data }) => {
 
 export default Relation;
 
-function getRelationType(type: connectionType) {
+function getRelationType(type: connectionType): string[] {
     switch (type) {
         case connectionType.MANY_TO_MANY:
             return ['n', 'n']
         case connectionType.ONE_TO_MANY:
             return ['1', 'n']
         case connectionType.ONE_TO_ONE:
-            return ['1', '1']
         default:
-            break
+            return ['1', '1']
     }
 }

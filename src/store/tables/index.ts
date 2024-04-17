@@ -83,7 +83,7 @@ const initialState: ITables = {
         //     startTableField: 0,
         //     endTableId: 3,
         //     endTableField: 0,
-        //     connectionName: connectionType.ONE_TO_ONE
+        //     connectionName: connectionType.MANY_TO_MANY
         // }
     ]
 }
