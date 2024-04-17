@@ -1,12 +1,13 @@
 import { tableDefaultColor } from "@/Constants/constants";
-import { ITable, ITableField } from "@/Types/table";
+import { connectionType } from "@/Constants/enums";
+import { ITable, ITableField, ITableRelation } from "@/Types/table";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 interface ITables {
     uniqueId: number
     tables: ITable[]
+    relations: ITableRelation[]
 }
-
 interface IAddTableAction {
     payload: {
         x: number,
@@ -27,11 +28,11 @@ interface IUpdateTableAction {
 }
 
 const initialState: ITables = {
-    uniqueId: 1,
+    uniqueId: 2,
     tables: [
         {
             id: 0,
-            name: 'test',
+            name: 'test1',
             x: 10,
             y: 20,
             comment: 'Comment',
@@ -41,7 +42,49 @@ const initialState: ITables = {
                 { name: 'test', type: 'CHAR', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
             ],
             color: tableDefaultColor
-        }
+        },
+        {
+            id: 1,
+            name: 'test2',
+            x: 400,
+            y: 70,
+            comment: '',
+            indices: '',
+            fields: [
+                { name: 'id', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+                { name: 'test', type: 'CHAR', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+            ],
+            color: tableDefaultColor
+        },
+        // {
+        //     id: 3,
+        //     name: 'test',
+        //     x: 200,
+        //     y: 70,
+        //     comment: '',
+        //     indices: '',
+        //     fields: [
+        //         { name: 'id', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+        //         { name: 'test', type: 'CHAR', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+        //     ],
+        //     color: tableDefaultColor
+        // }
+    ],
+    relations: [
+        {
+            startTableId: 0,
+            startTableField: 0,
+            endTableField: 1,
+            endTableId: 1,
+            connectionName: connectionType.ONE_TO_ONE
+        },
+        // {
+        //     startTableId: 0,
+        //     startTableField: 0,
+        //     endTableId: 3,
+        //     endTableField: 0,
+        //     connectionName: connectionType.ONE_TO_ONE
+        // }
     ]
 }
 

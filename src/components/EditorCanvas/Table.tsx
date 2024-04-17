@@ -1,4 +1,4 @@
-import { tabelHeaderHeight, tableDefaultColor, tableDefaultRowHeight, tableDefaultWidth } from "@/Constants/constants";
+import { tableDefaultColor, tableDefaultRowHeight, tableDefaultWidth, tableHeaderHeight } from "@/Constants/constants";
 import { objectType } from "@/Constants/enums";
 import { ITableField, ITable as TableType } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
@@ -11,7 +11,7 @@ import {
     IconMore
 } from "@douyinfe/semi-icons";
 import { Button, Popover, Toast } from "@douyinfe/semi-ui";
-import { FC, useState, MouseEvent } from "react";
+import { FC, MouseEvent, useState } from "react";
 
 interface ITable {
     tableData: TableType,
@@ -22,7 +22,7 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement }) => {
     const { mode } = useAppSelector(state => state.settings)
     const { selected } = useAppSelector(state => state.selected);
     const [hoveredField, setHoveredField] = useState(-1)
-    const totalTabelHeight = (tableData.fields.length * tableDefaultRowHeight) + tabelHeaderHeight + 3;
+    const totalTabelHeight = (tableData.fields.length * tableDefaultRowHeight) + tableHeaderHeight + 3;
     return (
         <foreignObject
             x={tableData.x}

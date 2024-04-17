@@ -1,3 +1,5 @@
+import { connectionType } from "@/Constants/enums"
+
 export interface ITable {
     id: number,
     name: string,
@@ -15,7 +17,14 @@ export interface ITableField {
     details: ITableFieldDetails
 }
 
-interface ITableFieldDetails {
+export interface ITableRelation {
+    startTableId: number,
+    endTableId: number,
+    startTableField: number,
+    endTableField: number,
+    connectionName: connectionType
+}
+export interface ITableFieldDetails {
     nulable: boolean,
     primary: boolean,
     unique: boolean,

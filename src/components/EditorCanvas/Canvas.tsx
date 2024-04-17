@@ -6,6 +6,7 @@ import { setPan, setScale, setTransform } from "@/store/transform";
 import { Button } from "@douyinfe/semi-ui";
 import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import Table from "./Table";
+import Relation from "./Relation";
 
 const Canvas: FC = () => {
     const dispatch = useAppDispatch();
@@ -24,7 +25,7 @@ const Canvas: FC = () => {
     });
     const [cursor, setCursor] = useState<string>('auto');
     const canvasRef = useRef<SVGSVGElement>(null);
-    const { tables } = useAppSelector(state => state.tables)
+    const { tables, relations } = useAppSelector(state => state.tables)
     const { selected } = useAppSelector(state => state.selected)
     const { scale, pan } = useAppSelector(state => state.transform)
 
@@ -134,6 +135,7 @@ const Canvas: FC = () => {
                 }}
                 id="diagram"
             >
+                {relations.map(r => <Relation data={r} />)}
                 {tables.map((f) => <Table onMouseDownOnElement={onMouseDownOnElement} key={f.id} tableData={f} />)}
             </g>
         </svg>
