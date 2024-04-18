@@ -135,7 +135,7 @@ const Canvas: FC = () => {
                 }}
                 id="diagram"
             >
-                {relations.map(r => <Relation data={r} />)}
+                {relations.map((r, i) => <Relation key={i} data={r} />)}
                 {tables.map((f) => <Table onMouseDownOnElement={onMouseDownOnElement} key={f.id} tableData={f} />)}
             </g>
         </svg>

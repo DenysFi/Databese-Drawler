@@ -37,8 +37,8 @@ export function calcPath({ x1, x2, y1, y2, width }: ICalcPath) {
             L ${midX} ${y2 - radius} 
             A ${radius} ${radius} 0 0 1 ${midX - radius} ${y2} 
             L ${x2 + width} ${y2}`;
-        } else if (x1 > x2 && x2 <= x1 + width) {
-            // left + under table
+        } else if (x1 >= x2 && x2 <= x1 + width) {
+            // left + up table
             const x2offset = x2 - 20;
             return `M ${x1} ${y1} 
             L ${x2offset} ${y1 + 0.1} 
@@ -47,7 +47,7 @@ export function calcPath({ x1, x2, y1, y2, width }: ICalcPath) {
             A ${radius} ${radius} 0 0 0 ${x2offset} ${y2} 
             L ${x2} ${y2}`;
         } else if (x2 > x1 && x2 <= x1 + width) {
-            // right + under table
+            // right + up table
             const x2offset = x2 + width + 20;
             return `M ${x1 + width} ${y1} 
             L ${x2offset} ${y1 + 0.1} 
@@ -74,7 +74,7 @@ export function calcPath({ x1, x2, y1, y2, width }: ICalcPath) {
             L ${midX} ${y2 + radius} 
             A ${radius} ${radius} 0 0 0 ${midX - radius} ${y2} 
             L ${x2 + width} ${y2}`;
-        } else if (x1 > x2 && x2 <= x1 + width) {
+        } else if (x1 >= x2 && x2 <= x1 + width) {
             // left + under table
             const x2offset = x2 - 20;
             return `M ${x1} ${y1} 

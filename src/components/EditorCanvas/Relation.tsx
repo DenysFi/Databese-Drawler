@@ -1,5 +1,5 @@
 import { tableDefaultRowHeight, tableDefaultWidth, tableHeaderHeight } from "@/Constants/constants";
-import { connectionType, objectType } from "@/Constants/enums";
+import { connectionType } from "@/Constants/enums";
 import { ITableRelation } from "@/Types/table";
 import { useAppSelector } from "@/redux-hooks";
 import { calcPath } from "@/utiles/calckPath";

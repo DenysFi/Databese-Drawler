@@ -22,13 +22,13 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement }) => {
     const { mode } = useAppSelector(state => state.settings)
     const { selected } = useAppSelector(state => state.selected);
     const [hoveredField, setHoveredField] = useState(-1)
-    const totalTabelHeight = (tableData.fields.length * tableDefaultRowHeight) + tableHeaderHeight + 3;
+    const totaltableHeight = (tableData.fields.length * tableDefaultRowHeight) + tableHeaderHeight + 3;
     return (
         <foreignObject
             x={tableData.x}
             y={tableData.y}
             width={tableDefaultWidth}
-            height={totalTabelHeight}
+            height={totaltableHeight}
             onMouseDown={(e) => {
                 onMouseDownOnElement(e, tableData.id, objectType.Table);
             }}
