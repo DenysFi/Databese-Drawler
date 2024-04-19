@@ -66,7 +66,7 @@ const initialState: ITables = {
             indices: '',
             fields: [
                 { name: 'id', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
-                { name: 'test', type: 'CHAR', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+                { name: 'test', type: 'CHAR', details: { nulable: true, primary: false, autoinc: false, unique: false, defaultValue: '' } },
             ],
             color: tableDefaultColor
         }

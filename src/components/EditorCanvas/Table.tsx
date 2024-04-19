@@ -1,4 +1,4 @@
-import { tableDefaultColor, tableDefaultRowHeight, tableDefaultWidth, tableHeaderHeight } from "@/Constants/constants";
+import { tableDefaultColor, tableDefaultRowHeight, tableDefaultWidth, tableHeaderHeight, tagColors } from "@/Constants/constants";
 import { objectType } from "@/Constants/enums";
 import { ITableField, ITable as TableType } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
@@ -10,7 +10,8 @@ import {
     IconMinus,
     IconMore
 } from "@douyinfe/semi-icons";
-import { Button, Popover, Toast } from "@douyinfe/semi-ui";
+import { Button, Popover, Space, Tag, Toast } from "@douyinfe/semi-ui";
+import { TagColor } from "@douyinfe/semi-ui/lib/es/tag";
 import { FC, MouseEvent, useState } from "react";
 
 interface ITable {
@@ -59,7 +60,6 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement }) => {
                         <Popover
                             showArrow
                             trigger='click'
-                            autoAdjustOverflow
                             position='rightTop'
                             className="popover-theme"
                             content={(
@@ -96,12 +96,42 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement }) => {
                 {
                     tableData.fields.map((f, i) => {
                         return (
-                            field(f, i)
+                            <Popover
+                                showArrow
+                                className="popover-theme"
+                                content={
+                                    <div >
+                                        <div className="flex justify-between border-b-[1px] border-slate-400 pb-[10px] mb-[10px]" >
+                                            <h4 className="font-medium ">{f.name}</h4>
+                                            <span className=" opacity-[0.7]">{f.type}</span>
+                                        </div>
+                                        {(f.details.autoinc || !f.details.nulable || f.details.primary || f.details.unique) && <Space className="mb-[5px]">
+                                            {
+                                                f.details.autoinc && <Tag color={tagColors[0] as TagColor}> Increment </Tag>
+                                            }
+                                            {
+                                                !f.details.nulable && <Tag color={tagColors[1] as TagColor}> Not Null </Tag>
+                                            }
+                                            {
+                                                f.details.primary && <Tag color={tagColors[2] as TagColor}> Primary </Tag>
+                                            }
+                                            {
+                                                f.details.unique && <Tag color={tagColors[3] as TagColor}> unique </Tag>
+                                            }
+                                        </Space>}
+                                        <div> <span className="font-medium">Default: </span> {f.details.defaultValue || 'Not set'}</div>
+                                    </div>
+                                }
+                                position="right"
+                            >
+                                {field(f, i)}
+                            </Popover >
+
                         )
                     })
                 }
-            </article>
-        </foreignObject>
+            </article >
+        </foreignObject >
     );
 
     function field(f: ITableField, i: number) {
