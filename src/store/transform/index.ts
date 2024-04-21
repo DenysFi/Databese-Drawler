@@ -1,4 +1,4 @@
-import { scaleMinimum } from "@/Constants/constants";
+import { scaleMinimum, scaleStep } from "@/Constants/constants";
 import { createSlice } from "@reduxjs/toolkit";
 
 interface Itransform {
@@ -7,7 +7,7 @@ interface Itransform {
 }
 
 interface ISetScaleAction {
-    payload: number
+    payload: number | { deltaY: number }
 }
 
 interface ISetPanAction {
@@ -18,16 +18,18 @@ const initialState: Itransform = {
     pan: { x: 0, y: 0 },
     scale: 1
 }
-const scaleStep = 1.05;
+
 const transformSlice = createSlice({
     name: 'transform',
     initialState,
     reducers: {
         setScale(state, action: ISetScaleAction) {
-            const scale = state.scale;
-            const newScale = action.payload < 0 ? scale * scaleStep : scale / scaleStep;
-            if (newScale < scaleMinimum) return;
-            state.scale = newScale;
+            if (typeof action.payload === 'object' && 'deltaY' in action.payload) {
+                const newScale = action.payload.deltaY < 0 ? state.scale * scaleStep : state.scale / scaleStep;
+                state.scale = newScale;
+                return;
+            }
+            state.scale = action.payload
         },
         setPan(state, { payload }: ISetPanAction) {
             const { x, y } = payload
