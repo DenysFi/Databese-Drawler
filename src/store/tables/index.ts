@@ -27,13 +27,16 @@ interface IRemoveTableAction {
 interface IUpdateTableAction {
     payload: Partial<ITableField> & { id: number, x: number, y: number },
 }
+interface ITableRelationAddAction {
+    payload: ITableRelation
+}
 
 const initialState: ITables = {
     uniqueId: 2,
     tables: [
         {
             id: 0,
-            name: 'test1',
+            name: 'test0',
             x: 10,
             y: 20,
             comment: 'Comment',
@@ -46,8 +49,8 @@ const initialState: ITables = {
         },
         {
             id: 1,
-            name: 'test2',
-            x: 400,
+            name: 'test1',
+            x: 500,
             y: 70,
             comment: '',
             indices: '',
@@ -58,10 +61,10 @@ const initialState: ITables = {
             color: tableDefaultColor
         },
         {
-            id: 3,
-            name: 'test',
+            id: 2,
+            name: 'test2',
             x: 200,
-            y: 70,
+            y: 270,
             comment: '',
             indices: '',
             fields: [
@@ -82,7 +85,7 @@ const initialState: ITables = {
         {
             startTableId: 0,
             startTableField: 0,
-            endTableId: 3,
+            endTableId: 2,
             endTableField: 0,
             connectionName: connectionType.MANY_TO_MANY
         }
@@ -133,6 +136,9 @@ const tablesSlice = createSlice({
                 }).filter(Boolean) as ITableRelation[];
             }
         },
+        addRelation(state, action: ITableRelationAddAction) {
+            state.relations.push(action.payload)
+        }
     }
 })
 export default tablesSlice.reducer;
@@ -142,5 +148,6 @@ export const {
     updateTable,
     updateField,
     addField,
-    removeField
+    removeField,
+    addRelation
 } = tablesSlice.actions

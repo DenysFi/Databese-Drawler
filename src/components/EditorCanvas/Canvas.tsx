@@ -1,12 +1,24 @@
-import { objectType } from "@/Constants/enums";
+import { connectionType, objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setSelected } from "@/store/selected";
-import { addTable, updateTable } from "@/store/tables";
-import { setPan, setScale, setTransform } from "@/store/transform";
-import { Button } from "@douyinfe/semi-ui";
-import { FC, MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import { addRelation, addTable, updateTable } from "@/store/tables";
+import { setPan, setScale } from "@/store/transform";
+import { Toast } from "@douyinfe/semi-ui";
+import { FC, MouseEvent, useEffect, useRef, useState } from "react";
 import Table from "./Table";
 import Relation from "./Relation";
+import { ITableRelation } from "@/Types/table";
+import { relationExist } from "@/utiles";
+
+export interface ILinking {
+    startTableField: number,
+    startTableId: number,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+    isLinking: boolean
+}
 
 const Canvas: FC = () => {
     const dispatch = useAppDispatch();
@@ -23,31 +35,53 @@ const Canvas: FC = () => {
         dx: 0,
         dy: 0
     });
+    const [hoveredTable, setHoveredTable] = useState({ tid: -1, fid: -1 });
+    const [linking, setLinking] = useState<Partial<ILinking>>({
+        isLinking: false,
+        startTableField: -1,
+        startTableId: -1,
+        startX: 0,
+        startY: 0,
+        endX: 0,
+        endY: 0
+    })
     const [cursor, setCursor] = useState<string>('auto');
     const canvasRef = useRef<SVGSVGElement>(null);
     const { tables, relations } = useAppSelector(state => state.tables)
     const { selected } = useAppSelector(state => state.selected)
     const { scale, pan } = useAppSelector(state => state.transform)
-
     function onMouseDownOnElement(event: MouseEvent<SVGForeignObjectElement>, id: number, type: objectType) {
-        const table = tables.find(t => t.id === id)
-        setOffset({
-            x: event.clientX / scale - table!.x,
-            y: event.clientY / scale - table!.y
-        })
-        setDragging({
-            id,
-            element: type
-        })
-        dispatch(setSelected({ id, element: type }))
+
+        if (type === objectType.Table) {
+            const table = tables.find(t => t.id === id)
+            setOffset({
+                x: event.clientX / scale - table!.x,
+                y: event.clientY / scale - table!.y
+            })
+            setDragging({
+                id,
+                element: type
+            })
+            dispatch(setSelected({ id, element: type }))
+        }
+
     }
 
-    function onClik() {
-        dispatch(addTable({ scale: scale, x: pan.x, y: pan.y }))
-    }
+    // function onClick() {
+    //     dispatch(addTable({ scale: scale, x: pan.x, y: pan.y }))
+    // }
 
     function onMouseMove(event: MouseEvent<SVGSVGElement>) {
-        if (dragging.id >= 0 && dragging.element === objectType.Table) {
+
+        if (linking.isLinking) {
+            const mouseX = (event.clientX - pan.x) / scale;
+            const mouseY = (event.clientY - pan.y) / scale;
+            setLinking({
+                ...linking,
+                endX: linking.startX! > mouseX ? mouseX + 2 : mouseX - 2,
+                endY: linking.startY! > mouseY ? mouseY + 2 : mouseY - 2
+            })
+        } else if (dragging.id >= 0 && dragging.element === objectType.Table) {
             const x = event.clientX / scale - offset.x,
                 y = event.clientY / scale - offset.y;
             dispatch(updateTable({ id: selected.id, x, y }))
@@ -64,6 +98,10 @@ const Canvas: FC = () => {
     }
 
     function onMouseUpNdLeave() {
+        if (linking.isLinking) {
+            handleLinking();
+        }
+
         setDragging({
             id: -1,
             element: objectType.None
@@ -74,6 +112,15 @@ const Canvas: FC = () => {
             dy: 0
         })
         setCursor('auto')
+        setLinking({
+            isLinking: false,
+            startTableField: -1,
+            startTableId: -1,
+            startX: 0,
+            startY: 0,
+            endX: 0,
+            endY: 0
+        })
     }
 
     function onMouseDown(e: MouseEvent) {
@@ -82,6 +129,53 @@ const Canvas: FC = () => {
             dx: e.clientX - pan.x,
             dy: e.clientY - pan.y
         })
+    }
+
+    const onStartLinking = (data: ILinking) => {
+
+        setLinking({
+            ...linking,
+            ...data,
+        })
+        setDragging({
+            id: -1,
+            element: objectType.None
+        })
+        setPanning({
+            isPanning: false,
+            dx: -1,
+            dy: -1
+        })
+    }
+
+    function handleLinking() {
+        if (linking.startTableId === -1 || hoveredTable.tid === -1) {
+            Toast.warning('Cancel!')
+            return
+        }
+        if (linking.startTableId === hoveredTable.tid) {
+            Toast.warning('Cannot connect field with same table!')
+            return;
+        }
+        const startTable = tables.find(t => t.id === linking.startTableId)
+        const endTable = tables.find(t => t.id === hoveredTable.tid);
+        if (startTable!.fields[linking.startTableField!].type !== endTable!.fields[hoveredTable.fid].type) {
+            Toast.warning('Cannot connect field with different types!')
+            return;
+        }
+        const newRelation: ITableRelation = {
+            startTableField: linking.startTableField!,
+            startTableId: linking.startTableId!,
+            endTableField: hoveredTable.fid,
+            endTableId: hoveredTable.tid,
+            connectionName: connectionType.ONE_TO_ONE
+        }
+        if (relationExist(relations, newRelation)) {
+            Toast.warning('Relation already exist!')
+            return;
+        }
+
+        dispatch(addRelation(newRelation))
     }
 
     useEffect(() => {
@@ -94,8 +188,8 @@ const Canvas: FC = () => {
 
         return () => canvas.removeEventListener("wheel", onMouseWheel)
     }, [dispatch])
+
     return (<>
-        <Button onClick={onClik} />
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="100%"
@@ -136,7 +230,13 @@ const Canvas: FC = () => {
                 id="diagram"
             >
                 {relations.map((r, i) => <Relation key={i} data={r} />)}
-                {tables.map((f) => <Table onMouseDownOnElement={onMouseDownOnElement} key={f.id} tableData={f} />)}
+                {tables.map((f) => <Table
+                    onMouseDownOnElement={onMouseDownOnElement}
+                    onStartLinking={onStartLinking}
+                    setHoveredTable={setHoveredTable}
+                    key={f.id}
+                    tableData={f} />)}
+                {linking.isLinking && <path d={`M ${linking.startX} ${linking.startY} L ${linking.endX!} ${linking.endY}`} stroke-dasharray="10" fill="none" stroke="red" strokeWidth='2px' />}
             </g>
         </svg>
     </>
