@@ -1,22 +1,23 @@
+import { ITable, ITableRelation } from "@/Types/table";
 import Dexie, { Table } from "dexie";
 
 interface IDiagrams {
     id?: number,
     lastModified: string,
-    tables: [],
-    relationships: [],
+    tables: ITable[],
+    relations: ITableRelation[],
     pan: { x: number, y: number }
-    zoom: number
+    scale: number,
+    lastId: number
 }
 
 class DbDrawler extends Dexie {
-
     diagrams!: Table<IDiagrams>;
 
     constructor() {
         super('dbdrawler');
         this.version(5).stores({
-            diagrams: '++id, lastModified'
+            diagrams: '++id, lastModified, scale, tables, relationships'
         })
     }
 }

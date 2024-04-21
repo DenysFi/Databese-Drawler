@@ -103,6 +103,7 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement, onStartLinking, se
                         return (
                             <Popover
                                 showArrow
+                                key={i}
                                 className="popover-theme"
                                 content={
                                     <div >

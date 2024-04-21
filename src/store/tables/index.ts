@@ -11,9 +11,10 @@ interface ITables {
 }
 interface IAddTableAction {
     payload: {
-        x: number,
-        y: number,
-        scale: number
+        x?: number,
+        y?: number,
+        scale?: number
+        data?: ITable[]
     }
 }
 
@@ -28,67 +29,70 @@ interface IUpdateTableAction {
     payload: Partial<ITableField> & { id: number, x: number, y: number },
 }
 interface ITableRelationAddAction {
-    payload: ITableRelation
+    payload: ITableRelation | ITableRelation[]
+}
+interface ISetUniqueIdAction {
+    payload: number
 }
 
 const initialState: ITables = {
     uniqueId: 2,
     tables: [
-        {
-            id: 0,
-            name: 'test0',
-            x: 10,
-            y: 20,
-            comment: 'Comment',
-            indices: 'ind',
-            fields: [
-                { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
-                { name: 'test', type: dataType.CHAR, details: { nulable: false, primary: false, autoinc: true, unique: true, defaultValue: '' } },
-            ],
-            color: tableDefaultColor
-        },
-        {
-            id: 1,
-            name: 'test1',
-            x: 500,
-            y: 70,
-            comment: '',
-            indices: '',
-            fields: [
-                { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
-                { name: 'test', type: dataType.DATATIME, details: { nulable: false, primary: false, autoinc: true, unique: true, defaultValue: '' } },
-            ],
-            color: tableDefaultColor
-        },
-        {
-            id: 2,
-            name: 'test2',
-            x: 200,
-            y: 270,
-            comment: '',
-            indices: '',
-            fields: [
-                { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
-                { name: 'test', type: dataType.CHAR, details: { nulable: true, primary: false, autoinc: false, unique: false, defaultValue: '' } },
-            ],
-            color: tableDefaultColor
-        }
+        // {
+        //     id: 0,
+        //     name: 'test0',
+        //     x: 10,
+        //     y: 20,
+        //     comment: 'Comment',
+        //     indices: 'ind',
+        //     fields: [
+        //         { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+        //         { name: 'test', type: dataType.CHAR, details: { nulable: false, primary: false, autoinc: true, unique: true, defaultValue: '' } },
+        //     ],
+        //     color: tableDefaultColor
+        // },
+        // {
+        //     id: 1,
+        //     name: 'test1',
+        //     x: 500,
+        //     y: 70,
+        //     comment: '',
+        //     indices: '',
+        //     fields: [
+        //         { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+        //         { name: 'test', type: dataType.DATATIME, details: { nulable: false, primary: false, autoinc: true, unique: true, defaultValue: '' } },
+        //     ],
+        //     color: tableDefaultColor
+        // },
+        // {
+        //     id: 2,
+        //     name: 'test2',
+        //     x: 200,
+        //     y: 270,
+        //     comment: '',
+        //     indices: '',
+        //     fields: [
+        //         { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+        //         { name: 'test', type: dataType.CHAR, details: { nulable: true, primary: false, autoinc: false, unique: false, defaultValue: '' } },
+        //     ],
+        //     color: tableDefaultColor
+        // }
     ],
     relations: [
-        {
-            startTableId: 0,
-            startTableField: 0,
-            endTableField: 1,
-            endTableId: 1,
-            connectionName: connectionType.ONE_TO_ONE
-        },
-        {
-            startTableId: 0,
-            startTableField: 0,
-            endTableId: 2,
-            endTableField: 0,
-            connectionName: connectionType.MANY_TO_MANY
-        }
+        // {
+        //     startTableId: 0,
+        //     startTableField: 0,
+        //     endTableField: 1,
+        //     endTableId: 1,
+        //     connectionName: connectionType.ONE_TO_ONE
+        // },
+        // {
+        //     startTableId: 0,
+        //     startTableField: 0,
+        //     endTableId: 2,
+        //     endTableField: 0,
+        //     connectionName: connectionType.MANY_TO_MANY
+        // }
     ]
 }
 
@@ -98,7 +102,15 @@ const tablesSlice = createSlice({
     name: 'tables',
     initialState,
     reducers: {
+        setUniqueId(state, action: ISetUniqueIdAction) {
+            state.uniqueId = action.payload + 1;
+        },
         addTable(state, action: IAddTableAction) {
+            if (action.payload.data) {
+
+                state.tables = [...action.payload.data];
+                return;
+            }
             const { x: tx, y: ty, scale } = action.payload
             const newTable = createNewTable(state.uniqueId, tx, ty, scale)
             state.uniqueId += 1;
@@ -137,7 +149,11 @@ const tablesSlice = createSlice({
             }
         },
         addRelation(state, action: ITableRelationAddAction) {
-            state.relations.push(action.payload)
+            if (Array.isArray(action.payload)) {
+                state.relations = [...action.payload]
+            } else {
+                state.relations.push(action.payload)
+            }
         }
     }
 })
@@ -149,5 +165,6 @@ export const {
     updateField,
     addField,
     removeField,
-    addRelation
+    addRelation,
+    setUniqueId
 } = tablesSlice.actions

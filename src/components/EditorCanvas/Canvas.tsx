@@ -9,6 +9,7 @@ import Table from "./Table";
 import Relation from "./Relation";
 import { ITableRelation } from "@/Types/table";
 import { relationExist } from "@/utiles";
+import { scaleStep } from "@/Constants/constants";
 
 export interface ILinking {
     startTableField: number,
@@ -150,17 +151,17 @@ const Canvas: FC = () => {
 
     function handleLinking() {
         if (linking.startTableId === -1 || hoveredTable.tid === -1) {
-            Toast.warning('Cancel!')
+            Toast.warning('Cancel.')
             return
         }
         if (linking.startTableId === hoveredTable.tid) {
-            Toast.warning('Cannot connect field with same table!')
+            Toast.warning('Cannot connect field with same table.')
             return;
         }
         const startTable = tables.find(t => t.id === linking.startTableId)
         const endTable = tables.find(t => t.id === hoveredTable.tid);
         if (startTable!.fields[linking.startTableField!].type !== endTable!.fields[hoveredTable.fid].type) {
-            Toast.warning('Cannot connect field with different types!')
+            Toast.warning('Cannot connect field with different types.')
             return;
         }
         const newRelation: ITableRelation = {
@@ -171,7 +172,7 @@ const Canvas: FC = () => {
             connectionName: connectionType.ONE_TO_ONE
         }
         if (relationExist(relations, newRelation)) {
-            Toast.warning('Relation already exist!')
+            Toast.warning('Relation already exist.')
             return;
         }
 
@@ -180,11 +181,12 @@ const Canvas: FC = () => {
 
     useEffect(() => {
         function onMouseWheel(event: WheelEvent) {
-            dispatch(setScale(event.deltaY))
+
+            dispatch(setScale({ deltaY: event.deltaY }))
         }
         const canvas = canvasRef.current;
         if (!canvas) return;
-        canvas.addEventListener("wheel", onMouseWheel);
+        canvas.addEventListener("wheel", onMouseWheel, { passive: true });
 
         return () => canvas.removeEventListener("wheel", onMouseWheel)
     }, [dispatch])
