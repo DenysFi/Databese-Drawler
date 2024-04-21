@@ -8,7 +8,8 @@ import {
     IconDeleteStroked,
     IconEdit,
     IconMinus,
-    IconMore
+    IconMore,
+    IconKey
 } from "@douyinfe/semi-icons";
 import { Button, Popover, Space, Tag, Toast } from "@douyinfe/semi-ui";
 import { TagColor } from "@douyinfe/semi-ui/lib/es/tag";
@@ -184,7 +185,12 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement, onStartLinking, se
                             dispatch(removeField({ tid: tableData.id, fid: i }))
                             dispatch(nullSelected())
                         }}
-                    /> : <span className=" opacity-[0.7]">{f.type}</span>
+                    /> :
+                        (<div className=" opacity-[0.7]">
+                            {f.details.primary && <IconKey className="pr-[4px]" size="small" />}
+                            <span >{f.type}</span>
+                        </div>
+                        )
                 }
             </div>
         )
