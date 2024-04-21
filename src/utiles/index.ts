@@ -1,7 +1,7 @@
 import { ITableRelation } from "@/Types/table";
 
 export function relationExist(relations: ITableRelation[], relation: ITableRelation): boolean {
-    console.log(relations, relation);
+
     return relations.some(r => (
         (r.startTableField === relation.startTableField
             && r.startTableId === relation.startTableId)

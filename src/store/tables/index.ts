@@ -1,5 +1,5 @@
 import { tableDefaultColor } from "@/Constants/constants";
-import { connectionType } from "@/Constants/enums";
+import { connectionType, dataType } from "@/Constants/enums";
 import { ITable, ITableField, ITableRelation } from "@/Types/table";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { createNewTable, tableHasRelations } from "./helpers";
@@ -42,8 +42,8 @@ const initialState: ITables = {
             comment: 'Comment',
             indices: 'ind',
             fields: [
-                { name: 'id', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
-                { name: 'test', type: 'CHAR', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+                { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+                { name: 'test', type: dataType.CHAR, details: { nulable: false, primary: false, autoinc: true, unique: true, defaultValue: '' } },
             ],
             color: tableDefaultColor
         },
@@ -55,8 +55,8 @@ const initialState: ITables = {
             comment: '',
             indices: '',
             fields: [
-                { name: 'id', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
-                { name: 'test', type: 'CHAR', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+                { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+                { name: 'test', type: dataType.DATATIME, details: { nulable: false, primary: false, autoinc: true, unique: true, defaultValue: '' } },
             ],
             color: tableDefaultColor
         },
@@ -68,8 +68,8 @@ const initialState: ITables = {
             comment: '',
             indices: '',
             fields: [
-                { name: 'id', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
-                { name: 'test', type: 'CHAR', details: { nulable: true, primary: false, autoinc: false, unique: false, defaultValue: '' } },
+                { name: 'id', type: dataType.INT, details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+                { name: 'test', type: dataType.CHAR, details: { nulable: true, primary: false, autoinc: false, unique: false, defaultValue: '' } },
             ],
             color: tableDefaultColor
         }

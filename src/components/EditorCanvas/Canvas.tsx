@@ -1,4 +1,4 @@
-import { connectionType, objectType } from "@/Constants/enums";
+import { connectionType, dataType, objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setSelected } from "@/store/selected";
 import { addRelation, addTable, updateTable } from "@/store/tables";
