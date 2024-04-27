@@ -9,7 +9,6 @@ import Table from "./Table";
 import Relation from "./Relation";
 import { ITableRelation } from "@/Types/table";
 import { relationExist } from "@/utiles";
-import { scaleStep } from "@/Constants/constants";
 
 export interface ILinking {
     startTableField: number,
@@ -68,15 +67,17 @@ const Canvas: FC = () => {
 
     }
 
-    // function onClick() {
-    //     dispatch(addTable({ scale: scale, x: pan.x, y: pan.y }))
-    // }
+    function onClick() {
+        dispatch(addTable({ scale: scale, x: pan.x, y: pan.y }))
+    }
 
     function onMouseMove(event: MouseEvent<SVGSVGElement>) {
 
         if (linking.isLinking) {
-            const mouseX = (event.clientX - pan.x) / scale;
-            const mouseY = (event.clientY - pan.y) / scale;
+            const canvasOffset = canvasRef.current?.getBoundingClientRect();
+            const mouseX = (event.clientX - pan.x - canvasOffset!.x) / scale;
+            const mouseY = (event.clientY - pan.y - canvasOffset!.y) / scale;
+
             setLinking({
                 ...linking,
                 endX: linking.startX! > mouseX ? mouseX + 2 : mouseX - 2,
@@ -169,7 +170,8 @@ const Canvas: FC = () => {
             startTableId: linking.startTableId!,
             endTableField: hoveredTable.fid,
             endTableId: hoveredTable.tid,
-            connectionName: connectionType.ONE_TO_ONE
+            connectionType: connectionType.ONE_TO_ONE,
+            connectionName: `${startTable!.name}-${endTable!.name}`
         }
         if (relationExist(relations, newRelation)) {
             Toast.warning('Relation already exist.')
@@ -181,7 +183,6 @@ const Canvas: FC = () => {
 
     useEffect(() => {
         function onMouseWheel(event: WheelEvent) {
-
             dispatch(setScale({ deltaY: event.deltaY }))
         }
         const canvas = canvasRef.current;
@@ -192,6 +193,7 @@ const Canvas: FC = () => {
     }, [dispatch])
 
     return (<>
+        <button onClick={onClick}>ff</button>
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="100%"
@@ -238,7 +240,7 @@ const Canvas: FC = () => {
                     setHoveredTable={setHoveredTable}
                     key={f.id}
                     tableData={f} />)}
-                {linking.isLinking && <path d={`M ${linking.startX} ${linking.startY} L ${linking.endX!} ${linking.endY}`} stroke-dasharray="10" fill="none" stroke="red" strokeWidth='2px' />}
+                {linking.isLinking && <path d={`M ${linking.startX} ${linking.startY} L ${linking.endX!} ${linking.endY}`} strokeDasharray="10" fill="none" stroke="red" strokeWidth='2px' />}
             </g>
         </svg>
     </>

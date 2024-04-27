@@ -29,7 +29,6 @@ const Workspace: FC = () => {
     }, [dispatch])
 
 
-    // save logic
     useEffect(() => {
 
         const save = async () => {
@@ -59,14 +58,14 @@ const Workspace: FC = () => {
         save()
     }, [tables, pan, relations, scale, lastId])
 
-    //load data logic
+
     useEffect(() => {
         loadData()
     }, [loadData])
 
     return (
         <div className='app-wrapper h-[100vh] overflow-hidden theme'>
-            {/* <ControllPanel /> */}
+            <ControllPanel />
             <div className='flex h-full overflow-hidden'>
                 {/* <EditorSideBar /> */}
                 <div className='relative flex grow '>
