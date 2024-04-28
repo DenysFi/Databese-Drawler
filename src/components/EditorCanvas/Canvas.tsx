@@ -1,14 +1,14 @@
-import { connectionType, dataType, objectType } from "@/Constants/enums";
+import { connectionType, objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setSelected } from "@/store/selected";
 import { addRelation, addTable, updateTable } from "@/store/tables";
 import { setPan, setScale } from "@/store/transform";
 import { Toast } from "@douyinfe/semi-ui";
-import { FC, MouseEvent, useEffect, useRef, useState } from "react";
-import Table from "./Table";
+import { FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Relation from "./Relation";
-import { ITableRelation } from "@/Types/table";
+import { ITable, ITableRelation } from "@/Types/table";
 import { relationExist } from "@/utiles";
+import Tables from "./Tables";
 
 export interface ILinking {
     startTableField: number,
@@ -26,10 +26,7 @@ const Canvas: FC = () => {
         id: -1,
         element: objectType.None
     });
-    const [offset, setOffset] = useState({
-        x: 0,
-        y: 0
-    })
+
     const [panning, setPanning] = useState({
         isPanning: false,
         dx: 0,
@@ -50,22 +47,36 @@ const Canvas: FC = () => {
     const { tables, relations } = useAppSelector(state => state.tables)
     const { selected } = useAppSelector(state => state.selected)
     const { scale, pan } = useAppSelector(state => state.transform)
-    function onMouseDownOnElement(event: MouseEvent<SVGForeignObjectElement>, id: number, type: objectType) {
-
+    const coords = useRef({
+        mouseX: 0,
+        mouseY: 0,
+        tableX: 0,
+        tableY: 0,
+    })
+    const onMouseDownOnElement = useCallback((event: MouseEvent<SVGForeignObjectElement>, table: ITable, type: objectType) => {
         if (type === objectType.Table) {
-            const table = tables.find(t => t.id === id)
-            setOffset({
-                x: event.clientX / scale - table!.x,
-                y: event.clientY / scale - table!.y
-            })
+            coords.current = {
+                mouseX: event.clientX,
+                mouseY: event.clientY,
+                tableX: table.x,
+                tableY: table.y,
+            }
             setDragging({
-                id,
+                id: table.id,
                 element: type
-            })
-            dispatch(setSelected({ id, element: type }))
-        }
+            });
 
-    }
+            dispatch(setSelected({ id: table.id, element: type }))
+        }
+    }, [dispatch])
+
+    const offset = useMemo(() => {
+
+        const x = coords.current.mouseX / scale - coords.current.tableX;
+        const y = coords.current.mouseY / scale - coords.current.tableY;
+        return { x, y }
+    }, [scale, selected])
+
 
     function onClick() {
         dispatch(addTable({ scale: scale, x: pan.x, y: pan.y }))
@@ -132,13 +143,11 @@ const Canvas: FC = () => {
             dy: e.clientY - pan.y
         })
     }
-
-    const onStartLinking = (data: ILinking) => {
-
-        setLinking({
-            ...linking,
+    const onStartLinking = useCallback((data: ILinking) => {
+        setLinking((prev) => ({
+            ...prev,
             ...data,
-        })
+        }))
         setDragging({
             id: -1,
             element: objectType.None
@@ -148,7 +157,8 @@ const Canvas: FC = () => {
             dx: -1,
             dy: -1
         })
-    }
+    }, [])
+
 
     function handleLinking() {
         if (linking.startTableId === -1 || hoveredTable.tid === -1) {
@@ -234,12 +244,12 @@ const Canvas: FC = () => {
                 id="diagram"
             >
                 {relations.map((r, i) => <Relation key={i} data={r} />)}
-                {tables.map((f) => <Table
+                <Tables
                     onMouseDownOnElement={onMouseDownOnElement}
                     onStartLinking={onStartLinking}
                     setHoveredTable={setHoveredTable}
-                    key={f.id}
-                    tableData={f} />)}
+                    tables={tables} />
+
                 {linking.isLinking && <path d={`M ${linking.startX} ${linking.startY} L ${linking.endX!} ${linking.endY}`} strokeDasharray="10" fill="none" stroke="red" strokeWidth='2px' />}
             </g>
         </svg>

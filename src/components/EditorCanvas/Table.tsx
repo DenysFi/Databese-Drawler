@@ -1,6 +1,6 @@
 import { tableDefaultColor, tableDefaultRowHeight, tableDefaultWidth, tableHeaderHeight, tagColors } from "@/Constants/constants";
 import { objectType } from "@/Constants/enums";
-import { ITableField, ITable as TableType } from '@/Types/table';
+import { ITable, ITableField, ITable as TableType } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { nullSelected } from "@/store/selected";
 import { removeField, removeTable } from "@/store/tables";
@@ -13,19 +13,21 @@ import {
 } from "@douyinfe/semi-icons";
 import { Button, Popover, Space, Tag, Toast } from "@douyinfe/semi-ui";
 import { TagColor } from "@douyinfe/semi-ui/lib/es/tag";
-import { FC, MouseEvent, useState } from "react";
+import { FC, MouseEvent, memo, useState } from "react";
 import { ILinking } from "./Canvas";
 
-interface ITable {
+interface IFCTable {
     tableData: TableType,
-    onMouseDownOnElement: (event: MouseEvent<SVGForeignObjectElement>, id: number, type: objectType) => void;
+    onMouseDownOnElement: (event: MouseEvent<SVGForeignObjectElement>, table: ITable, type: objectType) => void;
     onStartLinking: (data: ILinking) => void;
-    setHoveredTable: (data: { tid: number, fid: number }) => void
+    setHoveredTable: (data: { tid: number, fid: number }) => void,
+    isSelected: boolean
 }
-const Table: FC<ITable> = ({ tableData, onMouseDownOnElement, onStartLinking, setHoveredTable }) => {
+const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLinking, setHoveredTable, isSelected }) => {
     const dispatch = useAppDispatch();
     const { mode } = useAppSelector(state => state.settings)
-    const { selected } = useAppSelector(state => state.selected);
+
+
     const [hoveredField, setHoveredField] = useState(-1);
     const totaltableHeight = (tableData.fields.length * tableDefaultRowHeight) + tableHeaderHeight + 3;
 
@@ -36,14 +38,15 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement, onStartLinking, se
             width={tableDefaultWidth}
             height={totaltableHeight}
             onMouseDown={(e) => {
-                onMouseDownOnElement(e, tableData.id, objectType.Table);
+                onMouseDownOnElement(e, tableData, objectType.Table);
+
             }}
             className="group drop-shadow-lg rounded-md cursor-move group select-none"
         >
             <article
-                className={`border-2 ${!(selected.id === tableData.id) && 'border-zinc-500'} w-full h-full overflow-hidden rounded table-theme hover:border-dashed hover:border-blue-500
+                className={`border-2 ${!isSelected && 'border-zinc-500'} w-full h-full overflow-hidden rounded table-theme hover:border-dashed hover:border-blue-500
             ${mode === "light" ? "bg-zinc-100 text-zinc-800" : "bg-zinc-800 text-zinc-200"}`}
-                style={{ borderColor: selected.id === tableData.id && tableData.color || '' }}
+                style={{ borderColor: isSelected && tableData.color || '' }}
             >
                 <div className="w-full h-[10px]" style={{ backgroundColor: tableData.color }}></div>
                 <div className={`h-[36px] px-[6px] border-b border-gray-400 flex justify-between ${mode === "light" ? "bg-zinc-200" : "bg-zinc-900"} items-center `}>
@@ -78,6 +81,7 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement, onStartLinking, se
                                         onClick={() => {
                                             Toast.success('Table deleted succesfully!')
                                             dispatch(removeTable(tableData.id))
+                                            dispatch(nullSelected())
                                         }}
                                     >
                                         Delete table
@@ -154,6 +158,7 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement, onStartLinking, se
                     setHoveredTable({ fid: -1, tid: -1 })
                     setHoveredField(-1);
                 }}
+
             >
                 <div className=" flex items-center gap-x-[5px] ">
                     <button
@@ -184,7 +189,6 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement, onStartLinking, se
                         size="small"
                         onClick={() => {
                             dispatch(removeField({ tid: tableData.id, fid: i }))
-                            dispatch(nullSelected())
                         }}
                     /> :
                         (<div className=" opacity-[0.7]">
@@ -196,6 +200,6 @@ const Table: FC<ITable> = ({ tableData, onMouseDownOnElement, onStartLinking, se
             </div>
         )
     }
-};
+});
 
 export default Table;
