@@ -22,7 +22,8 @@ export interface ITableRelation {
     endTableId: number,
     startTableField: number,
     endTableField: number,
-    connectionName: connectionType
+    connectionType: connectionType,
+    connectionName: string
 }
 export interface ITableFieldDetails {
     nulable: boolean,
