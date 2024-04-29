@@ -77,11 +77,6 @@ const Canvas: FC = () => {
         return { x, y }
     }, [scale, selected])
 
-
-    function onClick() {
-        dispatch(addTable({ scale: scale, x: pan.x, y: pan.y }))
-    }
-
     function onMouseMove(event: MouseEvent<SVGSVGElement>) {
 
         if (linking.isLinking) {
@@ -203,7 +198,6 @@ const Canvas: FC = () => {
     }, [dispatch])
 
     return (<>
-        <button onClick={onClick}>ff</button>
         <svg
             xmlns="http://www.w3.org/2000/svg"
             width="100%"
