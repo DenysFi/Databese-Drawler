@@ -39,7 +39,6 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
             height={totaltableHeight}
             onMouseDown={(e) => {
                 onMouseDownOnElement(e, tableData, objectType.Table);
-
             }}
             className="group drop-shadow-lg rounded-md cursor-move group select-none"
         >
@@ -129,7 +128,7 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
                                                 f.details.unique && <Tag color={tagColors[3] as TagColor}> unique </Tag>
                                             }
                                         </Space>}
-                                        <div> <span className="font-medium">Default: </span> {f.details.defaultValue || 'Not set'}</div>
+                                        <div><span className="font-medium">Default: </span> {f.details.defaultValue || 'Not set'}</div>
                                     </div>
                                 }
                                 position="right"

@@ -20,7 +20,7 @@ const Relation: FC<IRelation> = ({ data }) => {
         y1: 0,
         y2: 0
     })
-    const [fromText, toText] = getRelationType(data.connectionName);
+    const [fromText, toText] = getRelationType(data.connectionType);
     useEffect(() => {
         if (!relationRef.current) return;
 
