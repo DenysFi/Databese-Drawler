@@ -1,17 +1,18 @@
-import { Divider, Dropdown, Tooltip } from "@douyinfe/semi-ui";
+import { Divider, Dropdown, InputNumber, Tooltip } from "@douyinfe/semi-ui";
 import ZoomIn from "@/assets/zoom-in.png"
 import ZoomOut from "@/assets/zoom-out.png"
 import {
     IconSmallTriangleDown
 } from "@douyinfe/semi-icons";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setPan, setScale } from "@/store/transform";
-import { scales } from "@/Constants/constants";
+import { scaleMaximum, scaleMinimum, scales } from "@/Constants/constants";
 
 const Zoom: FC = () => {
     const dispatch = useAppDispatch();
     const { scale } = useAppSelector(state => state.transform);
+    const [value, setValue] = useState();
     return (
         <>
             <Dropdown
@@ -32,6 +33,16 @@ const Zoom: FC = () => {
                             >
                                 {s * 100}%
                             </Dropdown.Item>)}
+                        <Divider margin={'4px'} />
+                        <Dropdown.Item >
+                            <InputNumber
+                                min={scaleMinimum * 100}
+                                max={scaleMaximum * 100}
+                                suffix='%'
+                                defaultValue={value}
+                                placeholder={'Zoom'}
+                                onNumberChange={num => dispatch(setScale(num / 100))} />
+                        </Dropdown.Item>
                     </Dropdown.Menu>
                 }
             >
