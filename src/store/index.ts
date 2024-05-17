@@ -3,12 +3,14 @@ import settingsSlice from "./settings";
 import tablesSlice from "./tables";
 import selected from "./selected";
 import transform from "./transform";
+import layout from "./layout";
 
 const rootReducer = combineReducers({
     settings: settingsSlice,
     tables: tablesSlice,
     selected: selected,
-    transform: transform
+    transform: transform,
+    layout: layout
 })
 export const store = configureStore(
     {

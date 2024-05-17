@@ -29,3 +29,9 @@ export enum dataType {
     BLOB = 'BLOB',
     JSON = 'JSON',
 }
+
+export enum saveType {
+    NONE,
+    SAVING,
+    SAVED
+} 

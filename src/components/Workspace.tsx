@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
 import Canvas from "./EditorCanvas/Canvas";
 import ControllPanel from "./EditorHeader/ControllPanel";
 import EditorSideBar from "./EditorSidebar/EditorSideBar";
@@ -7,16 +7,17 @@ import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setPan, setScale } from "@/store/transform";
 import { addRelation, addTable, setUniqueId } from "@/store/tables";
 import { setSettingsValues } from "@/store/settings";
+import { saveType } from "@/Constants/enums";
 
 const Workspace: FC = () => {
     const dispatch = useAppDispatch();
     const { uniqueId: lastId, tables, relations } = useAppSelector(state => state.tables)
     const { pan, scale } = useAppSelector(state => state.transform)
-    const st = useAppSelector(state => state.settings)
+    const settings = useAppSelector(state => state.settings)
+    const [saving, setSaving] = useState(saveType.NONE)
 
     const loadData = useCallback(async () => {
         const data = await db.diagrams.orderBy('lastModified').last();
-
         if (data) {
             const { pan, scale, relations, tables, lastModified, lastId } = data;
             dispatch(setPan(pan))
@@ -24,39 +25,46 @@ const Workspace: FC = () => {
             dispatch(setUniqueId(lastId))
             dispatch(setScale(scale))
             dispatch(addRelation(relations))
-            // dispatch(setSettingsValues({ lastModified }))
+            dispatch(setSettingsValues({ lastModified }))
+
         }
+
     }, [dispatch])
 
+    const save = useCallback(async () => {
+        const count = await db.diagrams.count()
+        const lastModified = Date.now().toString();
+
+        setSaving(saveType.SAVING)
+        if (!count) {
+            await db.diagrams.add({
+                lastModified,
+                tables,
+                relations,
+                pan,
+                scale,
+                lastId
+            })
+
+        } else {
+            await db.diagrams.update(count, {
+                lastModified,
+                tables,
+                relations,
+                pan,
+                scale,
+                lastId
+            })
+        }
+        dispatch(setSettingsValues({ lastModified }))
+        setSaving(saveType.SAVED)
+    }, [dispatch, tables, pan, relations, scale, lastId])
 
     useEffect(() => {
-
-        const save = async () => {
-            const count = await db.diagrams.count()
-
-            if (!count) {
-                await db.diagrams.add({
-                    lastModified: Date.now().toString(),
-                    tables,
-                    relations,
-                    pan,
-                    scale,
-                    lastId
-                })
-            } else {
-                await db.diagrams.update(count, {
-                    lastModified: Date.now().toString(),
-                    tables,
-                    relations,
-                    pan,
-                    scale,
-                    lastId
-                })
-            }
-        }
+        if (!settings.autosave) return;
 
         save()
-    }, [tables, pan, relations, scale, lastId])
+    }, [save, settings.autosave])
 
 
     useEffect(() => {
@@ -65,7 +73,7 @@ const Workspace: FC = () => {
 
     return (
         <div className='app-wrapper h-[100vh] overflow-hidden theme'>
-            <ControllPanel />
+            <ControllPanel save={save} />
             <div className='flex h-full overflow-hidden'>
                 {/* <EditorSideBar /> */}
                 <div className='relative flex grow '>
