@@ -186,9 +186,10 @@ const Canvas: FC = () => {
         dispatch(addRelation(newRelation))
     }
 
+
     useEffect(() => {
         function onMouseWheel(event: WheelEvent) {
-            dispatch(setScale({ deltaY: event.deltaY }))
+            dispatch(setScale({ deltaY: event!.deltaY }))
         }
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -206,6 +207,7 @@ const Canvas: FC = () => {
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUpNdLeave}
             onMouseLeave={onMouseUpNdLeave}
+
             style={{
                 cursor: cursor
             }}
@@ -234,6 +236,7 @@ const Canvas: FC = () => {
             <g
                 style={{
                     transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})`,
+                    transformOrigin: "0 0",
                 }}
                 id="diagram"
             >
