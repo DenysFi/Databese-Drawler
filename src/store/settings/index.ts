@@ -5,7 +5,8 @@ interface ISettings {
     mode: string,
     showGrid: boolean
     showFieldSummary: boolean,
-    lastModified: string
+    lastModified: string,
+    autosave: boolean
 }
 interface ISetSettingsValuesAction {
     payload: Partial<ISettings>
@@ -14,7 +15,8 @@ const initialState: ISettings = {
     mode: 'light',
     showGrid: true,
     showFieldSummary: true,
-    lastModified: ''
+    lastModified: '',
+    autosave: true
 
 }
 export const settingsSlice = createSlice(
@@ -23,7 +25,7 @@ export const settingsSlice = createSlice(
         initialState,
         reducers: {
             setSettingsValues(state, action: ISetSettingsValuesAction) {
-                state = { ...state, ...action.payload }
+                Object.assign(state, action.payload);
             }
         }
     }
