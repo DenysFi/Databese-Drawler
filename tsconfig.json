@@ -8,24 +8,6 @@
       "@/": [
         "src/"
       ],
-      // "@components": [
-      //   "./src/components"
-      // ],
-      // "@components/*": [
-      //   "./src/components/*"
-      // ],
-      // "@store": [
-      //   "./src/store"
-      // ],
-      // "@store/*": [
-      //   "./src/store/*"
-      // ],
-      // "@scss/*": [
-      //   "./src/styles/*"
-      // ],
-      // "@scss/": [
-      //   "./src/styles"
-      // ]
     },
     "target": "ES2020",
     "useDefineForClassFields": true,

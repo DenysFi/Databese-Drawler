@@ -1,5 +1,3 @@
-import { tableDefaultColor } from "@/Constants/constants";
-import { connectionType, dataType } from "@/Constants/enums";
 import { ITable, ITableField, ITableRelation } from "@/Types/table";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { createNewTable, tableHasRelations } from "./helpers";
@@ -9,31 +7,22 @@ interface ITables {
     tables: ITable[]
     relations: ITableRelation[]
 }
-interface IAddTableAction {
-    payload: {
-        x?: number,
-        y?: number,
-        scale?: number
-        data?: ITable[]
-    }
+type IAddTableAction = {
+    x?: number,
+    y?: number,
+    scale?: number
+    data?: ITable[]
 }
 
-interface IRemoveTableAction {
-    payload: {
-        tid: number,
-        fid: number,
-    }
+type IRemoveTableAction = {
+    tid: number,
+    fid: number,
 }
 
-interface IUpdateTableAction {
-    payload: Partial<ITableField> & { id: number, x: number, y: number },
-}
-interface ITableRelationAddAction {
-    payload: ITableRelation | ITableRelation[]
-}
-interface ISetUniqueIdAction {
-    payload: number
-}
+type IUpdateTableAction =
+    Partial<ITableField> & { id: number, x: number, y: number }
+
+type ITableRelationAddAction = ITableRelation | ITableRelation[];
 
 const initialState: ITables = {
     uniqueId: 2,
@@ -102,27 +91,28 @@ const tablesSlice = createSlice({
     name: 'tables',
     initialState,
     reducers: {
-        setUniqueId(state, action: ISetUniqueIdAction) {
+        setUniqueId(state, action: PayloadAction<number>) {
             state.uniqueId = action.payload + 1;
         },
-        addTable(state, action: IAddTableAction) {
-            if (action.payload.data) {
-
+        addTable(state, action: PayloadAction<IAddTableAction>) {
+            if (action.payload.data !== undefined) {
                 state.tables = [...action.payload.data];
-                return;
+            } else {
+                const { x, y, scale } = action.payload;
+                if (x !== undefined && y !== undefined && scale !== undefined) {
+                    const newTable = createNewTable(state.uniqueId, x, y, scale);
+                    state.uniqueId += 1;
+                    state.tables.push(newTable);
+                }
             }
-            const { x: tx, y: ty, scale } = action.payload
-            const newTable = createNewTable(state.uniqueId, tx, ty, scale)
-            state.uniqueId += 1;
-            state.tables.push(newTable);
         },
         removeTable(state, action: PayloadAction<number>) {
             const tid = action.payload
             state.tables = state.tables.filter(tb => tb.id !== tid)
             state.relations = state.relations.filter(rel => !(rel.startTableId === tid || rel.endTableId === tid))
         },
-        updateTable(state, { payload }: IUpdateTableAction) {
-            const { id, ...values } = payload;
+        updateTable(state, action: PayloadAction<IUpdateTableAction>) {
+            const { id, ...values } = action.payload;
             state.tables = state.tables.map(t => t.id === id ? { ...t, ...values } : t);
         },
         updateField(state, action) {
@@ -131,24 +121,22 @@ const tablesSlice = createSlice({
         addField(state, action) {
 
         },
-        removeField(state, action: IRemoveTableAction) {
+        removeField(state, action: PayloadAction<IRemoveTableAction>) {
             const { tid, fid } = action.payload;
             state.tables = state.tables.map(t => t.id === tid ? { ...t, fields: t.fields.filter((_, i) => i !== fid) } : t)
 
             if (tableHasRelations(tid, state.relations)) {
                 state.relations = state.relations.map(r => {
-
                     if (r.startTableId === tid || r.endTableId === tid) {
                         if (r.startTableField > fid) r.startTableField = r.startTableField - 1
                         else if (r.endTableField > fid) r.endTableField = r.endTableField - 1
                         else if (r.startTableField === fid || r.endTableField === fid) return null;
                     }
-
                     return r;
                 }).filter(Boolean) as ITableRelation[];
             }
         },
-        addRelation(state, action: ITableRelationAddAction) {
+        addRelation(state, action: PayloadAction<ITableRelationAddAction>) {
             if (Array.isArray(action.payload)) {
                 state.relations = [...action.payload]
             } else {

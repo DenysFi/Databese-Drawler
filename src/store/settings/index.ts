@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 
 interface ISettings {
@@ -8,9 +8,9 @@ interface ISettings {
     lastModified: string,
     autosave: boolean
 }
-interface ISetSettingsValuesAction {
-    payload: Partial<ISettings>
-}
+type ISetSettingsValuesAction = Partial<ISettings>
+
+
 const initialState: ISettings = {
     mode: 'light',
     showGrid: true,
@@ -24,7 +24,7 @@ export const settingsSlice = createSlice(
         name: 'settings',
         initialState,
         reducers: {
-            setSettingsValues(state, action: ISetSettingsValuesAction) {
+            setSettingsValues(state, action: PayloadAction<ISetSettingsValuesAction>) {
                 Object.assign(state, action.payload);
             }
         }
