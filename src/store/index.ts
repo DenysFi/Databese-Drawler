@@ -4,13 +4,15 @@ import tablesSlice from "./tables";
 import selected from "./selected";
 import transform from "./transform";
 import layout from "./layout";
+import undoRedo from "./undoRedo";
 
 const rootReducer = combineReducers({
     settings: settingsSlice,
     tables: tablesSlice,
-    selected: selected,
-    transform: transform,
-    layout: layout
+    selected,
+    transform,
+    layout,
+    undoRedo
 })
 export const store = configureStore(
     {

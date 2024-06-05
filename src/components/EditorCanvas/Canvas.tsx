@@ -1,14 +1,15 @@
-import { connectionType, objectType } from "@/Constants/enums";
+import { canvasActionType, connectionType, objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setSelected } from "@/store/selected";
-import { addRelation, addTable, updateTable } from "@/store/tables";
+import { addRelation, updateTable } from "@/store/tables";
 import { setPan, setScale } from "@/store/transform";
 import { Toast } from "@douyinfe/semi-ui";
-import { FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, MouseEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Relation from "./Relation";
 import { ITable, ITableRelation } from "@/Types/table";
 import { relationExist } from "@/utiles";
 import Tables from "./Tables";
+import { pushUndoStack } from "@/store/undoRedo";
 
 export interface ILinking {
     startTableField: number,
@@ -20,11 +21,13 @@ export interface ILinking {
     isLinking: boolean
 }
 
-const Canvas: FC = () => {
+const Canvas: FC = memo(() => {
     const dispatch = useAppDispatch();
     const [dragging, setDragging] = useState({
         id: -1,
-        element: objectType.None
+        element: objectType.None,
+        x: 0,
+        y: 0
     });
 
     const [panning, setPanning] = useState({
@@ -42,6 +45,7 @@ const Canvas: FC = () => {
         endX: 0,
         endY: 0
     })
+    const [oldPan, setOldPan] = useState({ x: 0, y: 0 })
     const [cursor, setCursor] = useState<string>('auto');
     const canvasRef = useRef<SVGSVGElement>(null);
     const { tables, relations } = useAppSelector(state => state.tables)
@@ -63,15 +67,17 @@ const Canvas: FC = () => {
             }
             setDragging({
                 id: table.id,
-                element: type
+                element: type,
+                x: table.x,
+                y: table.y
             });
 
             dispatch(setSelected({ id: table.id, element: type }))
         }
+
     }, [dispatch])
 
     const offset = useMemo(() => {
-
         const x = coords.current.mouseX / scale - coords.current.tableX;
         const y = coords.current.mouseY / scale - coords.current.tableY;
         return { x, y }
@@ -108,11 +114,34 @@ const Canvas: FC = () => {
     function onMouseUpNdLeave() {
         if (linking.isLinking) {
             handleLinking();
+        } else if (dragging.id >= 0 && dragging.element === objectType.Table) {
+            const table = tables.find(t => t.id === selected.id)
+            if (!(Math.ceil(dragging.x) === Math.ceil(table!.x) && Math.ceil(dragging.y) === Math.ceil(table!.y))) {
+                dispatch(pushUndoStack({
+                    element: {
+                        ...table,
+                        x: dragging.x,
+                        y: dragging.y,
+                    } as ITable,
+                    objectType: objectType.Table,
+                    actionType: canvasActionType.MOVE
+                }))
+            }
+        } else if (panning.isPanning && (dragging.id === -1 || dragging.element === objectType.None)) {
+            if (!(Math.ceil(oldPan.x) === Math.ceil(pan.x) && Math.ceil(oldPan.y) === Math.ceil(pan.y))) {
+                dispatch(pushUndoStack({
+                    actionType: canvasActionType.PANMOVE,
+                    objectType: objectType.None,
+                    element: { pan: { x: oldPan.x, y: oldPan.y } }
+                }))
+            }
         }
 
         setDragging({
             id: -1,
-            element: objectType.None
+            element: objectType.None,
+            x: 0,
+            y: 0
         })
         setPanning({
             isPanning: false,
@@ -137,6 +166,7 @@ const Canvas: FC = () => {
             dx: e.clientX - pan.x,
             dy: e.clientY - pan.y
         })
+        setOldPan({ x: pan.x, y: pan.y });
     }
     const onStartLinking = useCallback((data: ILinking) => {
         setLinking((prev) => ({
@@ -145,7 +175,9 @@ const Canvas: FC = () => {
         }))
         setDragging({
             id: -1,
-            element: objectType.None
+            element: objectType.None,
+            x: 0,
+            y: 0
         })
         setPanning({
             isPanning: false,
@@ -252,6 +284,6 @@ const Canvas: FC = () => {
         </svg>
     </>
     );
-};
+});
 
 export default Canvas;

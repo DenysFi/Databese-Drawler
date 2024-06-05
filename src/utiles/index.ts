@@ -9,3 +9,4 @@ export function relationExist(relations: ITableRelation[], relation: ITableRelat
         return existRelName === newRelName || existRelName.split('-').reverse().join('-') === newRelName
     })
 }
+

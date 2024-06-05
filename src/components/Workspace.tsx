@@ -1,20 +1,19 @@
-import { FC, useCallback, useEffect, useState } from "react";
-import Canvas from "./EditorCanvas/Canvas";
-import ControllPanel from "./EditorHeader/ControllPanel";
-import EditorSideBar from "./EditorSidebar/EditorSideBar";
 import { db } from "@/Constants/db";
-import { useAppDispatch, useAppSelector } from "@/redux-hooks";
-import { setPan, setScale } from "@/store/transform";
-import { addRelation, addTable, setUniqueId } from "@/store/tables";
-import { setSettingsValues } from "@/store/settings";
 import { saveType } from "@/Constants/enums";
+import { useAppDispatch, useAppSelector } from "@/redux-hooks";
+import { setSettingsValues } from "@/store/settings";
+import { addRelation, addTable, setUniqueId } from "@/store/tables";
+import { setPan, setScale } from "@/store/transform";
+import { FC, useCallback, useEffect, useState } from "react";
+import ControllPanel from "./EditorHeader/ControllPanel";
+import Canvas from "./EditorCanvas/Canvas";
 
 const Workspace: FC = () => {
     const dispatch = useAppDispatch();
     const { uniqueId: lastId, tables, relations } = useAppSelector(state => state.tables)
     const { pan, scale } = useAppSelector(state => state.transform)
     const settings = useAppSelector(state => state.settings)
-    const [saving, setSaving] = useState(saveType.NONE)
+    const [_, setSaving] = useState(saveType.NONE)
 
     const loadData = useCallback(async () => {
         const data = await db.diagrams.orderBy('lastModified').last();
@@ -26,7 +25,6 @@ const Workspace: FC = () => {
             dispatch(setScale(scale))
             dispatch(addRelation(relations))
             dispatch(setSettingsValues({ lastModified }))
-
         }
 
     }, [dispatch])
@@ -34,7 +32,6 @@ const Workspace: FC = () => {
     const save = useCallback(async () => {
         const count = await db.diagrams.count()
         const lastModified = Date.now().toString();
-
         setSaving(saveType.SAVING)
         if (!count) {
             await db.diagrams.add({
@@ -60,10 +57,12 @@ const Workspace: FC = () => {
         setSaving(saveType.SAVED)
     }, [dispatch, tables, pan, relations, scale, lastId])
 
+    //Autosave on any data changes with debounce 
     useEffect(() => {
         if (!settings.autosave) return;
 
-        save()
+        const timeoutId = setTimeout(save, 300)
+        return () => clearTimeout(timeoutId)
     }, [save, settings.autosave])
 
 

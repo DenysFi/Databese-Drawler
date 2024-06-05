@@ -1,33 +1,34 @@
-import { FC, useEffect,  useRef, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import Logo from '@/assets/logo.png'
 import { useAppSelector } from '@/redux-hooks';
 import { motion, useAnimation } from 'framer-motion';
 
 const TopHeader: FC = () => {
     const { lastModified, } = useAppSelector(state => state.settings)
-    const {header} = useAppSelector(state => state.layout)
+    const { header } = useAppSelector(state => state.layout)
     const ref = useRef<HTMLDivElement>();
     const [divHeight, setDivHeight] = useState(0);
     const mainControls = useAnimation();
-    
+
     const date = new Date(+lastModified);
     const formatedDate = `Last saved ${date.getDay().toString().padStart(2, '0')}.${date.getMonth().toString().padStart(2, '0')}.${date.getFullYear()}, 
     ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')} `
+
     useEffect(() => {
         if (!ref.current) return;
         setDivHeight(ref.current.offsetHeight)
     }, [])
 
     useEffect(() => {
-        header ? mainControls.start('visible'):  mainControls.start('hidden')
+        header ? mainControls.start('visible') : mainControls.start('hidden')
     }, [header, mainControls, divHeight]);
 
     return (
         <motion.div
             variants={{
                 hidden: { height: 0, opacity: 1 },
-                default: {   opacity: 1 },
-                visible: {height: divHeight,   opacity: 1 },
+                default: { opacity: 1 },
+                visible: { height: divHeight, opacity: 1 },
             }}
             initial="default"
             animate={mainControls}

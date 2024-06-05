@@ -1,9 +1,8 @@
 import { tableDefaultColor, tableDefaultRowHeight, tableDefaultWidth, tableHeaderHeight, tagColors } from "@/Constants/constants";
 import { objectType } from "@/Constants/enums";
-import { ITable, ITableField, ITable as TableType } from '@/Types/table';
+import { ITable, ITableField } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
-import { nullSelected } from "@/store/selected";
-import { removeField, removeTable } from "@/store/tables";
+import { removeField } from "@/store/tables";
 import {
     IconDeleteStroked,
     IconEdit,
@@ -11,23 +10,22 @@ import {
     IconMore,
     IconKey
 } from "@douyinfe/semi-icons";
-import { Button, Popover, Space, Tag, Toast } from "@douyinfe/semi-ui";
+import { Button, Popover, Space, Tag } from "@douyinfe/semi-ui";
 import { TagColor } from "@douyinfe/semi-ui/lib/es/tag";
-import { FC, MouseEvent, memo, useState } from "react";
+import { FC, MouseEvent, ReactElement, memo, useEffect, useState } from "react";
 import { ILinking } from "./Canvas";
 
 interface IFCTable {
-    tableData: TableType,
+    tableData: ITable,
     onMouseDownOnElement: (event: MouseEvent<SVGForeignObjectElement>, table: ITable, type: objectType) => void;
     onStartLinking: (data: ILinking) => void;
     setHoveredTable: (data: { tid: number, fid: number }) => void,
-    isSelected: boolean
+    isSelected: boolean,
+    handleTableDelete: (tableData: ITable) => void
 }
-const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLinking, setHoveredTable, isSelected }) => {
+const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLinking, setHoveredTable, isSelected, handleTableDelete }) => {
     const dispatch = useAppDispatch();
     const { mode } = useAppSelector(state => state.settings)
-
-
     const [hoveredField, setHoveredField] = useState(-1);
     const totaltableHeight = (tableData.fields.length * tableDefaultRowHeight) + tableHeaderHeight + 3;
 
@@ -77,12 +75,7 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
                                         icon={<IconDeleteStroked />}
                                         block
                                         type='danger'
-                                        onClick={() => {
-                                            Toast.success('Table deleted succesfully!')
-                                            dispatch(removeTable(tableData.id))
-                                            dispatch(nullSelected())
-                                        }}
-                                    >
+                                        onClick={() => handleTableDelete(tableData)}>
                                         Delete table
                                     </Button>
                                 </div>
@@ -143,7 +136,7 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
         </foreignObject >
     );
 
-    function field(f: ITableField, i: number) {
+    function field(f: ITableField, i: number): ReactElement<'div'> {
         return (
             <div
                 key={i}

@@ -32,3 +32,13 @@ export interface ITableFieldDetails {
     defaultValue: string,
     autoinc: boolean
 }
+
+export interface Itransform {
+    pan: { x: number, y: number }
+    scale: number
+}
+
+export interface ITableRelations {
+    table: ITable,
+    relations: ITableRelation[]
+}

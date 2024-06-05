@@ -1,17 +1,17 @@
-import { ITable, ITableField, ITableRelation } from "@/Types/table";
+import { ITable, ITableRelation } from "@/Types/table";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { createNewTable, tableHasRelations } from "./helpers";
 
 interface ITables {
     uniqueId: number
     tables: ITable[]
-    relations: ITableRelation[]
+    relations: ITableRelation[],
 }
 type IAddTableAction = {
     x?: number,
     y?: number,
     scale?: number
-    data?: ITable[]
+    data?: ITable[] | ITable
 }
 
 type IRemoveTableAction = {
@@ -20,7 +20,7 @@ type IRemoveTableAction = {
 }
 
 type IUpdateTableAction =
-    Partial<ITableField> & { id: number, x: number, y: number }
+    Partial<ITable>
 
 type ITableRelationAddAction = ITableRelation | ITableRelation[];
 
@@ -82,10 +82,9 @@ const initialState: ITables = {
         //     endTableField: 0,
         //     connectionName: connectionType.MANY_TO_MANY
         // }
-    ]
+    ],
+
 }
-
-
 
 const tablesSlice = createSlice({
     name: 'tables',
@@ -96,13 +95,21 @@ const tablesSlice = createSlice({
         },
         addTable(state, action: PayloadAction<IAddTableAction>) {
             if (action.payload.data !== undefined) {
-                state.tables = [...action.payload.data];
+                if (Array.isArray(action.payload.data)) {
+                    state.tables = [...action.payload.data];
+                }
+                else {
+                    state.tables.push(action.payload.data)
+                }
             } else {
                 const { x, y, scale } = action.payload;
                 if (x !== undefined && y !== undefined && scale !== undefined) {
                     const newTable = createNewTable(state.uniqueId, x, y, scale);
                     state.uniqueId += 1;
                     state.tables.push(newTable);
+
+                    //return new table from action after dispatching
+                    action.payload.data = newTable;
                 }
             }
         },
@@ -138,13 +145,17 @@ const tablesSlice = createSlice({
         },
         addRelation(state, action: PayloadAction<ITableRelationAddAction>) {
             if (Array.isArray(action.payload)) {
-                state.relations = [...action.payload]
+                state.relations = [...state.relations, ...action.payload]
             } else {
                 state.relations.push(action.payload)
             }
-        }
+        },
+
     }
 })
+
+
+
 export default tablesSlice.reducer;
 export const {
     addTable,
@@ -154,5 +165,5 @@ export const {
     addField,
     removeField,
     addRelation,
-    setUniqueId
+    setUniqueId,
 } = tablesSlice.actions

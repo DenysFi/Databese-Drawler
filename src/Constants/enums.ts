@@ -34,4 +34,14 @@ export enum saveType {
     NONE,
     SAVING,
     SAVED
-} 
+}
+
+export enum canvasActionType {
+    DELETE,
+    ADD,
+    ADDFIELD,
+    REMOVEFIELD,
+    UPDATE,
+    MOVE,
+    PANMOVE,
+}

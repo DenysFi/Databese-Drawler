@@ -1,9 +1,14 @@
 import Table from "./Table";
-import { FC, memo, MouseEvent } from "react";
+import { FC, memo, MouseEvent, useCallback } from "react";
 import { ITable } from '@/Types/table';
 import { ILinking } from "./Canvas";
-import { objectType } from "@/Constants/enums";
-import { useAppSelector } from "@/redux-hooks";
+import { canvasActionType, objectType } from "@/Constants/enums";
+import { useAppDispatch, useAppSelector } from "@/redux-hooks";
+import { Toast } from "@douyinfe/semi-ui";
+import { removeTable } from "@/store/tables";
+import { pushUndoStack } from "@/store/undoRedo";
+import { nullSelected } from "@/store/selected";
+import { findRelationsByTableId } from "@/store/tables/helpers";
 
 interface IFCTables {
     tables: ITable[],
@@ -14,12 +19,31 @@ interface IFCTables {
 
 const Tables: FC<IFCTables> = memo(({ onMouseDownOnElement, onStartLinking, setHoveredTable, tables }) => {
     const { selected } = useAppSelector(state => state.selected)
+    const { relations } = useAppSelector(state => state.tables)
+    const dispatch = useAppDispatch();
+
+
+    const handleTableDelete = useCallback((tableData: ITable) => {
+        const findedRelations = findRelationsByTableId(relations, tableData.id)
+
+        Toast.success('Table deleted succesfully!')
+        dispatch(removeTable(tableData.id))
+
+        dispatch(pushUndoStack({
+            element: { table: tableData, relations: findedRelations },
+            objectType: objectType.Table,
+            actionType: canvasActionType.DELETE
+        }))
+        dispatch(nullSelected())
+    }, [dispatch, relations])
+
     return (
         <>
             {tables.map((f) => <Table
                 onMouseDownOnElement={onMouseDownOnElement}
                 onStartLinking={onStartLinking}
                 setHoveredTable={setHoveredTable}
+                handleTableDelete={handleTableDelete}
                 key={f.id}
                 tableData={f}
                 isSelected={selected.id === f.id}

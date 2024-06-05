@@ -1,10 +1,8 @@
 import { scaleMaximum, scaleMinimum, defaultScaleStep } from "@/Constants/constants";
+import { Itransform } from "@/Types/table";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-interface Itransform {
-    pan: { x: number, y: number }
-    scale: number
-}
+
 
 type ISetScaleAction = number | { deltaY: number, step?: number }
 
