@@ -6,7 +6,7 @@ import { canvasActionType, objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { Toast } from "@douyinfe/semi-ui";
 import { removeTable } from "@/store/tables";
-import { pushUndoStack } from "@/store/undoRedo";
+import { nullRedoStack, pushUndoStack } from "@/store/undoRedo";
 import { nullSelected } from "@/store/selected";
 import { findRelationsByTableId } from "@/store/tables/helpers";
 
@@ -34,6 +34,7 @@ const Tables: FC<IFCTables> = memo(({ onMouseDownOnElement, onStartLinking, setH
             objectType: objectType.Table,
             actionType: canvasActionType.DELETE
         }))
+        dispatch(nullRedoStack())
         dispatch(nullSelected())
     }, [dispatch, relations])
 

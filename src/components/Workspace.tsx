@@ -67,7 +67,9 @@ const Workspace: FC = () => {
 
 
     useEffect(() => {
-        loadData()
+        const timeoutId = setTimeout(loadData)
+
+        return () => clearTimeout(timeoutId)
     }, [loadData])
 
     return (

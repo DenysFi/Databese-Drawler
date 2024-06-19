@@ -13,6 +13,7 @@ export function createNewTable(uniqueId: number, tx: number, ty: number, scale: 
         indices: '',
         fields: [
             { name: 'id', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
+            { name: 'ffff', type: 'INT', details: { nulable: false, primary: true, autoinc: true, unique: true, defaultValue: '' } },
         ],
         color: tableDefaultColor
     }

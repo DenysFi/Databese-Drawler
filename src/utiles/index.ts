@@ -6,6 +6,7 @@ export function relationExist(relations: ITableRelation[], relation: ITableRelat
     return relations.some(r => {
         const existRelName = r.connectionName;
         const newRelName = relation.connectionName;
+        console.log(existRelName, newRelName);
         return existRelName === newRelName || existRelName.split('-').reverse().join('-') === newRelName
     })
 }

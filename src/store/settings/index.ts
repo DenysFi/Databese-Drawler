@@ -1,5 +1,6 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
+export const settingsModeSelector = (state: { settings: ISettings }) => state.settings.mode;
 
 interface ISettings {
     mode: string,

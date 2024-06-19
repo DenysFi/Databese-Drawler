@@ -1,9 +1,10 @@
 import { canvasActionType, objectType } from "@/Constants/enums";
-import { ITable, ITableRelations, Itransform } from "@/Types/table";
+import { FieldsWiithRelations, ITable, ITableRelation, ITableRelations, Itransform } from "@/Types/table";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
-export type elementTypesUnion = Partial<Itransform> | ITableRelations | ITable
-interface IUndoRedoAction {
+
+export type elementTypesUnion = Partial<Itransform> | ITableRelations | ITable | ITableRelation | FieldsWiithRelations
+export interface IUndoRedoAction {
     actionType: canvasActionType,
     objectType: objectType,
     element: elementTypesUnion
@@ -28,9 +29,29 @@ const undoRedoSlice = createSlice(
             },
             popUndoStack: (state) => {
                 state.undo.pop()
+            },
+            pushRedoStack: (state, action: PayloadAction<IUndoRedoAction>) => {
+                state.redo.push(action.payload)
+            },
+            popRedoStack: (state) => {
+                state.redo.pop()
+            },
+            nullRedoStack: (state) => {
+                state.redo = []
+            },
+            nullUndoStack: (state) => {
+                state.undo = []
             }
+
         }
     }
 )
 export default undoRedoSlice.reducer;
-export const { pushUndoStack, popUndoStack } = undoRedoSlice.actions;
+export const {
+    pushUndoStack,
+    popUndoStack,
+    pushRedoStack,
+    popRedoStack,
+    nullRedoStack,
+    nullUndoStack
+} = undoRedoSlice.actions;

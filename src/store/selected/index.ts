@@ -3,11 +3,11 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 interface ISelected {
     selected: {
-        id: number,
+        id: number | string,
         element: objectType
     }
 }
-type ISetSelected = Partial<ISelected> & { id: number, element: objectType }
+type ISetSelected = Partial<ISelected> & { id: number | string, element: objectType }
 
 const initialState: ISelected = {
     selected: {

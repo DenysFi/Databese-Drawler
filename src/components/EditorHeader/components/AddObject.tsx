@@ -2,7 +2,7 @@ import { canvasActionType, objectType } from '@/Constants/enums';
 import { ITable } from '@/Types/table';
 import { useAppDispatch, useAppSelector } from '@/redux-hooks';
 import { addTable } from '@/store/tables';
-import { pushUndoStack } from '@/store/undoRedo';
+import { nullRedoStack, pushUndoStack } from '@/store/undoRedo';
 import { Tooltip } from '@douyinfe/semi-ui';
 import { FC } from 'react'
 
@@ -12,12 +12,17 @@ const AddObject: FC = () => {
 
     function onTableAdd() {
         const { payload } = dispatch(addTable({ scale: scale, x: pan.x, y: pan.y }))
-        console.log(payload.data);
+
         dispatch(pushUndoStack({
-            element: payload.data as ITable,
+            element: {
+                table: payload.data as ITable,
+                relations: []
+            },
             objectType: objectType.Table,
             actionType: canvasActionType.ADD
         }))
+
+        dispatch(nullRedoStack())
     }
 
     return (

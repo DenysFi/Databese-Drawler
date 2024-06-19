@@ -9,7 +9,7 @@ import Relation from "./Relation";
 import { ITable, ITableRelation } from "@/Types/table";
 import { relationExist } from "@/utiles";
 import Tables from "./Tables";
-import { pushUndoStack } from "@/store/undoRedo";
+import { nullRedoStack, pushUndoStack } from "@/store/undoRedo";
 
 export interface ILinking {
     startTableField: number,
@@ -98,7 +98,8 @@ const Canvas: FC = memo(() => {
         } else if (dragging.id >= 0 && dragging.element === objectType.Table) {
             const x = event.clientX / scale - offset.x,
                 y = event.clientY / scale - offset.y;
-            dispatch(updateTable({ id: selected.id, x, y }))
+            const id = selected.id as number
+            dispatch(updateTable({ id, x, y }))
         } else if (panning.isPanning && (dragging.id === -1 || dragging.element === objectType.None)) {
             dispatch(setPan(
                 {
@@ -106,7 +107,6 @@ const Canvas: FC = memo(() => {
                     y: (event.clientY - panning.dy),
                 }
             ))
-
             setCursor('grabbing')
         }
     }
@@ -126,6 +126,7 @@ const Canvas: FC = memo(() => {
                     objectType: objectType.Table,
                     actionType: canvasActionType.MOVE
                 }))
+                dispatch(nullRedoStack())
             }
         } else if (panning.isPanning && (dragging.id === -1 || dragging.element === objectType.None)) {
             if (!(Math.ceil(oldPan.x) === Math.ceil(pan.x) && Math.ceil(oldPan.y) === Math.ceil(pan.y))) {
@@ -134,6 +135,7 @@ const Canvas: FC = memo(() => {
                     objectType: objectType.None,
                     element: { pan: { x: oldPan.x, y: oldPan.y } }
                 }))
+                dispatch(nullRedoStack())
             }
         }
 
@@ -196,8 +198,8 @@ const Canvas: FC = memo(() => {
             Toast.warning('Cannot connect field with same table.')
             return;
         }
-        const startTable = tables.find(t => t.id === linking.startTableId)
-        const endTable = tables.find(t => t.id === hoveredTable.tid);
+        const startTable = tables.find(t => t.id === linking.startTableId)!
+        const endTable = tables.find(t => t.id === hoveredTable.tid)!;
         if (startTable!.fields[linking.startTableField!].type !== endTable!.fields[hoveredTable.fid].type) {
             Toast.warning('Cannot connect field with different types.')
             return;
@@ -208,13 +210,18 @@ const Canvas: FC = memo(() => {
             endTableField: hoveredTable.fid,
             endTableId: hoveredTable.tid,
             connectionType: connectionType.ONE_TO_ONE,
-            connectionName: `${startTable!.name}-${endTable!.name}`
+            connectionName: `${startTable.name}_${startTable.fields[linking.startTableField!].name}-${endTable.name}_${endTable.fields[hoveredTable.fid].name}`
         }
         if (relationExist(relations, newRelation)) {
             Toast.warning('Relation already exist.')
             return;
         }
-
+        dispatch(pushUndoStack({
+            element: newRelation,
+            objectType: objectType.Relation,
+            actionType: canvasActionType.ADD
+        }))
+        dispatch(nullRedoStack())
         dispatch(addRelation(newRelation))
     }
 

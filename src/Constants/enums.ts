@@ -1,7 +1,9 @@
 export enum objectType {
     None,
     Table,
-    Area
+    Area,
+    Relation,
+    TableFields
 }
 export enum connectionType {
     ONE_TO_ONE,
@@ -39,7 +41,7 @@ export enum saveType {
 export enum canvasActionType {
     DELETE,
     ADD,
-    ADDFIELD,
+    addFields,
     REMOVEFIELD,
     UPDATE,
     MOVE,

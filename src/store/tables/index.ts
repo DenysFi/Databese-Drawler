@@ -1,4 +1,4 @@
-import { ITable, ITableRelation } from "@/Types/table";
+import { ITable, ITableField, ITableRelation } from "@/Types/table";
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 import { createNewTable, tableHasRelations } from "./helpers";
 
@@ -15,8 +15,10 @@ type IAddTableAction = {
 }
 
 type IRemoveTableAction = {
-    tid: number,
-    fid: number,
+    tid?: number,
+    fid?: number,
+    fields?: ITableField[],
+    relations?: ITableRelation[]
 }
 
 type IUpdateTableAction =
@@ -125,32 +127,45 @@ const tablesSlice = createSlice({
         updateField(state, action) {
 
         },
-        addField(state, action) {
-
+        addFields(state, action) {
+            const { tid, fields } = action.payload
+            state.tables = state.tables.map(t => t.id === tid ? { ...t, fields: fields } : t)
         },
         removeField(state, action: PayloadAction<IRemoveTableAction>) {
             const { tid, fid } = action.payload;
-            state.tables = state.tables.map(t => t.id === tid ? { ...t, fields: t.fields.filter((_, i) => i !== fid) } : t)
 
-            if (tableHasRelations(tid, state.relations)) {
+            const oldFields = JSON.parse(JSON.stringify(state.tables.find(t => t.id === tid)!.fields));
+            const oldRelations = JSON.parse(JSON.stringify(state.relations.filter(rel => (rel.startTableId === tid || rel.endTableId === tid))))
+
+            state.tables = state.tables.map(t => t.id === tid ? { ...t, fields: t.fields.filter((_, i) => i !== fid) } : t)
+            if (tableHasRelations(tid!, state.relations)) {
                 state.relations = state.relations.map(r => {
-                    if (r.startTableId === tid || r.endTableId === tid) {
-                        if (r.startTableField > fid) r.startTableField = r.startTableField - 1
-                        else if (r.endTableField > fid) r.endTableField = r.endTableField - 1
-                        else if (r.startTableField === fid || r.endTableField === fid) return null;
+                    if (r.startTableId === tid) {
+                        if (r.startTableField > fid!) r.startTableField = r.startTableField - 1
+                        else if (r.startTableField === fid! || r.endTableField === fid!) return null;
+                    } else if (r.endTableId === tid) {
+                        if (r.endTableField > fid!) r.endTableField = r.endTableField - 1
+                        else if (r.endTableField === fid!) return null;
                     }
                     return r;
                 }).filter(Boolean) as ITableRelation[];
             }
+
+            //return old table fields and old relations to avoid necessary rerenderings in <Table> component
+            action.payload.fields = oldFields
+            action.payload.relations = oldRelations
         },
         addRelation(state, action: PayloadAction<ITableRelationAddAction>) {
             if (Array.isArray(action.payload)) {
                 state.relations = [...state.relations, ...action.payload]
+                console.log(action.payload);
             } else {
                 state.relations.push(action.payload)
             }
         },
-
+        removeRelationByName(state, action: PayloadAction<string>) {
+            state.relations = state.relations.filter(r => r.connectionName !== action.payload)
+        }
     }
 })
 
@@ -162,8 +177,9 @@ export const {
     removeTable,
     updateTable,
     updateField,
-    addField,
+    addFields,
     removeField,
     addRelation,
     setUniqueId,
+    removeRelationByName
 } = tablesSlice.actions
