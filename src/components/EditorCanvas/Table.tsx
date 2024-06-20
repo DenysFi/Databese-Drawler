@@ -124,6 +124,7 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
                 objectType: objectType.TableFields,
                 actionType: canvasActionType.DELETE
             }))
+            setHoveredField(-1);
             dispatch(nullRedoStack())
         }
 
@@ -155,7 +156,7 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
 
         return (
             <div
-                key={i}
+
                 className={`h-[${tableDefaultRowHeight}px] px-[6px] py-[5px] flex justify-between items-center  
                 ${i === tableData.fields.length - 1 ? '' : 'border-b border-gray-400'} `}
                 onMouseEnter={onMouseEnterOnField}

@@ -23,5 +23,5 @@ export function tableHasRelations(tid: number, relations: ITableRelation[]): boo
 }
 
 export function findRelationsByTableId(relations: ITableRelation[], tid: number) {
-    return relations.filter(rel => (rel.startTableId === tid || rel.endTableId === tid))
+    return relations.filter(rel => (rel.startTableId === tid))
 }

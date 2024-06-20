@@ -43,8 +43,10 @@ export interface ITableRelations {
     relations: ITableRelation[]
 }
 
+
 export type FieldsWiithRelations = {
     tid: number,
     fields: ITableField[],
     relations: ITableRelation[]
+    oldRelations?: ITableRelation[]
 }

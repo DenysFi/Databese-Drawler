@@ -1,6 +1,7 @@
 import { canvasActionType, objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { addFields, addRelation, addTable, removeRelationByName, removeTable, updateTable } from "@/store/tables";
+import { findRelationsByTableId } from "@/store/tables/helpers";
 import { setPan } from "@/store/transform";
 import { IUndoRedoAction, popRedoStack, popUndoStack, pushRedoStack, pushUndoStack } from "@/store/undoRedo";
 import { isPan, isRelation, isTable, isTableWithFildsForUpdate, isTableWithReltaions } from "@/utiles/typeGuards";
@@ -61,14 +62,20 @@ const UndoRedo: FC = () => {
                         actionType: canvasActionType.ADD,
                     }
                 } else if (action.objectType === objectType.TableFields && isTableWithFildsForUpdate(element)) {
+                    const currentRelations = findRelationsByTableId(relations, element.tid)
+                    const currentTableFields = tables.find(t => t.id === element.tid)!.fields
+                    console.log(currentRelations)
 
                     returnAction = {
                         objectType: objectType.TableFields,
-                        element,
+                        element: {
+                            tid: element.tid,
+                            fields: currentTableFields,
+                            relations: element.relations,
+                            oldRelations: currentRelations
+                        },
                         actionType: canvasActionType.ADD,
                     }
-
-                    
                     // save current state of table, find relations and add them to returnAction
 
 
@@ -76,6 +83,14 @@ const UndoRedo: FC = () => {
                     //clearing prev existing connections by name
                     element.relations.forEach(r => dispatch(removeRelationByName(r.connectionName)))
                     dispatch(addRelation(element.relations))
+                } else if (action.objectType === objectType.Relation && isRelation(element)) {
+                    dispatch(addRelation(element))
+
+                    returnAction = {
+                        objectType: objectType.Relation,
+                        element,
+                        actionType: canvasActionType.ADD,
+                    }
                 }
                 break
             }
@@ -89,24 +104,29 @@ const UndoRedo: FC = () => {
                     dispatch(removeTable(element.table.id))
                 } else if (action.objectType === objectType.Relation && isRelation(element)) {
                     dispatch(removeRelationByName(element.connectionName))
+
                     returnAction = {
                         objectType: objectType.Relation,
                         element,
                         actionType: canvasActionType.DELETE,
                     }
                 } else if (action.objectType === objectType.TableFields && isTableWithFildsForUpdate(element)) {
+                    const currentTableFields = tables.find(t => t.id === element.tid)!.fields
+
                     returnAction = {
                         objectType: objectType.TableFields,
-                        element,
+                        element: {
+                            ...element,
+                            fields: currentTableFields,
+                            relations: element.relations
+                        },
                         actionType: canvasActionType.DELETE,
                     }
 
-                    
-
                     dispatch(addFields({ tid: element.tid, fields: element.fields }))
-                    // //clearing prev existing connections by name
-                    // element.element.relations.forEach(r => dispatch(removeRelationByName(r.connectionName)))
-                    // dispatch(addRelation(element.element.relations))
+                    element.relations.forEach(r => dispatch(removeRelationByName(r.connectionName)))
+                    element.oldRelations!.forEach(r => dispatch(removeRelationByName(r.connectionName)))
+                    dispatch(addRelation(element.oldRelations!))
                 }
                 break
             }

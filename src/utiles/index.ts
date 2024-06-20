@@ -11,3 +11,6 @@ export function relationExist(relations: ITableRelation[], relation: ITableRelat
     })
 }
 
+export function findUnique<T>(array: T[]): T[] {
+    return array.filter((item) => array.indexOf(item) === array.lastIndexOf(item))
+}
