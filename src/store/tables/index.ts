@@ -169,8 +169,6 @@ const tablesSlice = createSlice({
     }
 })
 
-
-
 export default tablesSlice.reducer;
 export const {
     addTable,

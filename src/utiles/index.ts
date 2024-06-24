@@ -14,3 +14,4 @@ export function relationExist(relations: ITableRelation[], relation: ITableRelat
 export function findUnique<T>(array: T[]): T[] {
     return array.filter((item) => array.indexOf(item) === array.lastIndexOf(item))
 }
+export const is_mobile = navigator.userAgent.match(/Android/i) || navigator.userAgent.match(/iPhone/i) || navigator.userAgent.match(/BlackBerry/i);

@@ -1,14 +1,14 @@
-import Table from "./Table";
-import { FC, memo, MouseEvent, useCallback } from "react";
-import { ITable } from '@/Types/table';
-import { ILinking } from "./Canvas";
 import { canvasActionType, objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
-import { Toast } from "@douyinfe/semi-ui";
-import { removeTable } from "@/store/tables";
-import { nullRedoStack, pushUndoStack } from "@/store/undoRedo";
 import { nullSelected } from "@/store/selected";
+import { removeTable } from "@/store/tables";
 import { findRelationsByTableId } from "@/store/tables/helpers";
+import { nullRedoStack, pushUndoStack } from "@/store/undoRedo";
+import { ITable } from '@/Types/table';
+import { Toast } from "@douyinfe/semi-ui";
+import { FC, memo, MouseEvent, useCallback } from "react";
+import { ILinking } from "./Canvas";
+import Table from "./Table";
 
 interface IFCTables {
     tables: ITable[],
@@ -28,7 +28,6 @@ const Tables: FC<IFCTables> = memo(({ onMouseDownOnElement, onStartLinking, setH
 
         Toast.success('Table deleted succesfully!')
         dispatch(removeTable(tableData.id))
-
         dispatch(pushUndoStack({
             element: { table: tableData, relations: findedRelations },
             objectType: objectType.Table,
