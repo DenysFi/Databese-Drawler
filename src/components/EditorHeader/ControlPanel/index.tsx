@@ -5,7 +5,7 @@ import {
 } from "@douyinfe/semi-icons";
 import { Divider, Tooltip } from "@douyinfe/semi-ui";
 import { FC, memo } from "react";
-import TopHeader from "./TopHeader";
+import TopHeader from "../TopHeader";
 import AddObject from "./components/AddObject";
 import Layout from "./components/Layout";
 import UndoRedo from "./components/UndoRedo";

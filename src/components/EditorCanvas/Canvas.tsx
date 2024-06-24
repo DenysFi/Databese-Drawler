@@ -242,6 +242,10 @@ const Canvas: FC = memo(() => {
             xmlns="http://www.w3.org/2000/svg"
             width="100%"
             height="100%"
+            onTouchStart={onMouseDown}
+            onTouchMove={onMouseMove}
+            onTouchEnd={onMouseUpNdLeave}
+            onTouchCancel={onMouseUpNdLeave}
             onMouseDown={onMouseDown}
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUpNdLeave}
@@ -294,3 +298,6 @@ const Canvas: FC = memo(() => {
 });
 
 export default Canvas;
+
+
+
