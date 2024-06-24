@@ -1,9 +1,9 @@
 import { useAppSelector } from '@/redux-hooks';
+import { Dropdown } from '@douyinfe/semi-ui';
 import { FC, useRef } from 'react';
 import Slide from '../../common/Slide';
-import TopHeaderLogo from './components/TopHeaderLogo';
-import { Dropdown } from '@douyinfe/semi-ui';
 import LastModified from './components/LastModified';
+import TopHeaderLogo from './components/TopHeaderLogo';
 
 const TopHeader: FC = () => {
     const { header } = useAppSelector(state => state.layout)
