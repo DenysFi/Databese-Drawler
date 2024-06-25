@@ -23,6 +23,7 @@ export interface ILinking {
 
 const Canvas: FC = memo(() => {
     const dispatch = useAppDispatch();
+    const { showGrid } = useAppSelector(state => state.settings)
     const [dragging, setDragging] = useState({
         id: -1,
         element: objectType.None,
@@ -224,7 +225,7 @@ const Canvas: FC = memo(() => {
         dispatch(nullRedoStack())
         dispatch(addRelation(newRelation))
     }
-
+    console.log(relations)
 
     useEffect(() => {
         function onMouseWheel(event: WheelEvent) {
@@ -242,8 +243,6 @@ const Canvas: FC = memo(() => {
             xmlns="http://www.w3.org/2000/svg"
             width="100%"
             height="100%"
-            onTouchStart={onMouseDown}
-            onTouchMove={onMouseMove}
             onTouchEnd={onMouseUpNdLeave}
             onTouchCancel={onMouseUpNdLeave}
             onMouseDown={onMouseDown}
@@ -256,7 +255,7 @@ const Canvas: FC = memo(() => {
             }}
             ref={canvasRef}
         >
-            <defs>
+            {showGrid && <defs>
                 <pattern
                     x={0}
                     y={0}
@@ -274,7 +273,7 @@ const Canvas: FC = memo(() => {
                         id="pattern-circle">
                     </circle>
                 </pattern>
-            </defs>
+            </defs>}
             <rect fill='url(#canvas-bg)' width={'100%'} height={'100%'}></rect>
             <g
                 style={{
@@ -283,14 +282,14 @@ const Canvas: FC = memo(() => {
                 }}
                 id="diagram"
             >
-                {relations.map((r, i) => <Relation key={i} data={r} />)}
+                {relations.map((r) => <Relation key={r.connectionName} data={r} />)}
+
                 <Tables
                     onMouseDownOnElement={onMouseDownOnElement}
                     onStartLinking={onStartLinking}
                     setHoveredTable={setHoveredTable}
                     tables={tables} />
-
-                {linking.isLinking && <path d={`M ${linking.startX} ${linking.startY} L ${linking.endX!} ${linking.endY}`} strokeDasharray="10" fill="none" stroke="red" strokeWidth='2px' />}
+                {linking.isLinking && <path d={`M ${linking.startX} ${linking.startY} L ${linking.endX} ${linking.endY}`} strokeDasharray="10" fill="none" stroke="red" strokeWidth='2px' />}
             </g>
         </svg>
     </>

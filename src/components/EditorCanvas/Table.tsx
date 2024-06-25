@@ -13,7 +13,7 @@ import { Button, Popover } from "@douyinfe/semi-ui";
 import { FC, MouseEvent, ReactElement, memo, useCallback, useState } from "react";
 import { ILinking } from "./Canvas";
 import { nullRedoStack, pushUndoStack } from "@/store/undoRedo";
-import { settingsModeSelector } from "@/store/settings";
+import { settingsModeSelector, settingsShowFieldSummarySelector } from "@/store/settings";
 import PopoverFieldContent from "./ui/PopoverFieldContent";
 import PopoverTableMoreContent from "./ui/PopoverTableMoreContent";
 
@@ -26,9 +26,18 @@ interface IFCTable {
     handleTableDelete: (tableData: ITable) => void
 }
 
-const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLinking, setHoveredTable, isSelected, handleTableDelete }) => {
+const Table: FC<IFCTable> = memo(({
+    tableData,
+    onMouseDownOnElement,
+    onStartLinking,
+    setHoveredTable,
+    isSelected,
+    handleTableDelete
+}) => {
     const dispatch = useAppDispatch();
     const mode = useAppSelector(settingsModeSelector);
+    console.log(mode)
+    const showFieldSummary = useAppSelector(settingsShowFieldSummarySelector);
     const [hoveredField, setHoveredField] = useState(-1);
     const totaltableHeight = (tableData.fields.length * tableDefaultRowHeight) + tableHeaderHeight + 3;
 
@@ -51,11 +60,11 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
         >
             <article
                 className={`border-2 ${!isSelected && 'border-zinc-500'} w-full h-full overflow-hidden rounded table-theme hover:border-dashed hover:border-blue-500
-            ${mode ? "bg-zinc-100 text-zinc-800" : "bg-zinc-800 text-zinc-200"}`}
+            ${mode === 'light' ? "bg-zinc-100 text-zinc-800" : "bg-zinc-800 text-zinc-200"}`}
                 style={{ borderColor: isSelected && tableData.color || '' }}
             >
                 <div className="w-full h-[10px]" style={{ backgroundColor: tableData.color }}></div>
-                <div className={`h-[36px] px-[6px] border-b border-gray-400 flex justify-between ${mode ? "bg-zinc-200" : "bg-zinc-900"} items-center `}>
+                <div className={`h-[36px] px-[6px] border-b border-gray-400 flex justify-between ${mode === 'light' ? "bg-zinc-200" : "bg-zinc-900"} items-center `}>
                     <div>
                         <h4 className={`font-medium text-base  `} >{tableData.name}</h4>
                     </div>
@@ -99,15 +108,16 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
                 {
                     tableData.fields.map((f, i) => {
                         return (
-                            <Popover
-                                showArrow
-                                key={i}
-                                className="popover-theme"
-                                content={<PopoverFieldContent field={f} />}
-                                position="right"
-                            >
-                                {field(f, i)}
-                            </Popover >
+                            showFieldSummary ?
+                                <Popover
+                                    showArrow
+                                    key={i}
+                                    className="popover-theme"
+                                    content={<PopoverFieldContent field={f} />}
+                                    position="right"
+                                >
+                                    {field(f, i)}
+                                </Popover > : field(f, i)
                         )
                     })
                 }
@@ -153,6 +163,7 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
             setHoveredField(-1);
         }
         const activeField = hoveredField === i;
+        const activeFieldTExtColor = mode === 'light' ? 'text-black/50' : 'text-white/50';
 
         return (
             <div
@@ -167,7 +178,7 @@ const Table: FC<IFCTable> = memo(({ tableData, onMouseDownOnElement, onStartLink
                         className={`rounded-full w-[9px] h-[9px] p-0 `} style={{ backgroundColor: tableDefaultColor }}
                         onMouseDown={onMouseDown}
                     ></button>
-                    <p className={`${activeField && 'text-black/50' || ''}`}>{f.name}</p>
+                    <p className={`${activeField && activeFieldTExtColor || ''}`}>{f.name}</p>
                 </div>
                 {
                     activeField ? <Button

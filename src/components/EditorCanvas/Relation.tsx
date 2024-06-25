@@ -12,6 +12,7 @@ interface IRelation {
 const Relation: FC<IRelation> = ({ data }) => {
     const { tables } = useAppSelector(state => state.tables);
     const { selected } = useAppSelector(state => state.selected);
+    const showCardinality = useAppSelector(state => state.settings.showCardinality);
     const dispatch = useAppDispatch();
 
     const table1 = tables.find(t => t.id === data.startTableId)!
@@ -64,10 +65,14 @@ const Relation: FC<IRelation> = ({ data }) => {
                     y1: table1.y + tableHeaderHeight + ((data.startTableField * tableDefaultRowHeight) + tableDefaultRowHeight) - tableDefaultRowHeight / 2,
                     y2: table2.y + tableHeaderHeight + ((data.endTableField * tableDefaultRowHeight) + tableDefaultRowHeight) - tableDefaultRowHeight / 2
                 })} strokeWidth='2px' stroke="gray" fill="none" />
-            <circle className={`group-hover:fill-sky-700 ${isSelected ? 'fill-sky-700' : ''}`} cx={circlesCoords.x1} cy={circlesCoords.y1} r={circleRadius} stroke="none" fill="gray" />
-            <text x={circlesCoords.x1} y={circlesCoords.y1} fill="white" textAnchor="middle" dominantBaseline='middle'>{fromText}</text>
-            <circle className={`group-hover:fill-sky-700 ${isSelected ? 'fill-sky-700' : ''}`} cx={circlesCoords.x2} cy={circlesCoords.y2} r={circleRadius} stroke="none" fill="gray" />
-            <text x={circlesCoords.x2} y={circlesCoords.y2} fill="white" textAnchor="middle" dominantBaseline='middle'>{toText}</text>
+
+            {showCardinality && (<>
+
+                <circle className={`group-hover:fill-sky-700 ${isSelected ? 'fill-sky-700' : ''}`} cx={circlesCoords.x1} cy={circlesCoords.y1} r={circleRadius} stroke="none" fill="gray" />
+                <text x={circlesCoords.x1} y={circlesCoords.y1} fill="white" textAnchor="middle" dominantBaseline='middle'>{fromText}</text>
+                <circle className={`group-hover:fill-sky-700 ${isSelected ? 'fill-sky-700' : ''}`} cx={circlesCoords.x2} cy={circlesCoords.y2} r={circleRadius} stroke="none" fill="gray" />
+                <text x={circlesCoords.x2} y={circlesCoords.y2} fill="white" textAnchor="middle" dominantBaseline='middle'>{toText}</text>
+            </>)}
         </g>
     );
 };

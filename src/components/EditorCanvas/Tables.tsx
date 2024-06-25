@@ -39,15 +39,16 @@ const Tables: FC<IFCTables> = memo(({ onMouseDownOnElement, onStartLinking, setH
 
     return (
         <>
-            {tables.map((f) => <Table
-                onMouseDownOnElement={onMouseDownOnElement}
-                onStartLinking={onStartLinking}
-                setHoveredTable={setHoveredTable}
-                handleTableDelete={handleTableDelete}
-                key={f.id}
-                tableData={f}
-                isSelected={selected.id === f.id}
-            />
+            {tables.map((f) =>
+                <Table
+                    onMouseDownOnElement={onMouseDownOnElement}
+                    onStartLinking={onStartLinking}
+                    setHoveredTable={setHoveredTable}
+                    handleTableDelete={handleTableDelete}
+                    key={f.id}
+                    tableData={f}
+                    isSelected={selected.id === f.id}
+                />
             )}
         </>
     );
