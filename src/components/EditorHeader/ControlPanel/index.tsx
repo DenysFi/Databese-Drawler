@@ -4,8 +4,8 @@ import {
     IconChevronDown
 } from "@douyinfe/semi-icons";
 import { Divider, Tooltip } from "@douyinfe/semi-ui";
-import { FC } from "react";
-import TopHeader from "./TopHeader";
+import { FC, memo } from "react";
+import TopHeader from "../TopHeader";
 import AddObject from "./components/AddObject";
 import Layout from "./components/Layout";
 import UndoRedo from "./components/UndoRedo";
@@ -15,7 +15,7 @@ interface ControllPanelProps {
     save: () => void,
 }
 
-const ControllPanel: FC<ControllPanelProps> = ({ save }) => {
+const ControllPanel: FC<ControllPanelProps> = memo(({ save }) => {
     const { header } = useAppSelector(state => state.layout)
     const dispatch = useAppDispatch();
     return (
@@ -44,6 +44,6 @@ const ControllPanel: FC<ControllPanelProps> = ({ save }) => {
             </div>
         </div>
     );
-};
+});
 
 export default ControllPanel;  

@@ -32,3 +32,21 @@ export interface ITableFieldDetails {
     defaultValue: string,
     autoinc: boolean
 }
+
+export interface Itransform {
+    pan: { x: number, y: number }
+    scale: number
+}
+
+export interface ITableRelations {
+    table: ITable,
+    relations: ITableRelation[]
+}
+
+
+export type FieldsWiithRelations = {
+    tid: number,
+    fields: ITableField[],
+    relations: ITableRelation[]
+    oldRelations?: ITableRelation[]
+}

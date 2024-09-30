@@ -1,14 +1,15 @@
-import { connectionType, objectType } from "@/Constants/enums";
+import { canvasActionType, connectionType, objectType } from "@/Constants/enums";
 import { useAppDispatch, useAppSelector } from "@/redux-hooks";
 import { setSelected } from "@/store/selected";
-import { addRelation, addTable, updateTable } from "@/store/tables";
+import { addRelation, updateTable } from "@/store/tables";
 import { setPan, setScale } from "@/store/transform";
 import { Toast } from "@douyinfe/semi-ui";
-import { FC, MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { FC, MouseEvent, memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Relation from "./Relation";
 import { ITable, ITableRelation } from "@/Types/table";
 import { relationExist } from "@/utiles";
 import Tables from "./Tables";
+import { nullRedoStack, pushUndoStack } from "@/store/undoRedo";
 
 export interface ILinking {
     startTableField: number,
@@ -20,11 +21,14 @@ export interface ILinking {
     isLinking: boolean
 }
 
-const Canvas: FC = () => {
+const Canvas: FC = memo(() => {
     const dispatch = useAppDispatch();
+    const { showGrid } = useAppSelector(state => state.settings)
     const [dragging, setDragging] = useState({
         id: -1,
-        element: objectType.None
+        element: objectType.None,
+        x: 0,
+        y: 0
     });
 
     const [panning, setPanning] = useState({
@@ -42,6 +46,7 @@ const Canvas: FC = () => {
         endX: 0,
         endY: 0
     })
+    const [oldPan, setOldPan] = useState({ x: 0, y: 0 })
     const [cursor, setCursor] = useState<string>('auto');
     const canvasRef = useRef<SVGSVGElement>(null);
     const { tables, relations } = useAppSelector(state => state.tables)
@@ -63,15 +68,17 @@ const Canvas: FC = () => {
             }
             setDragging({
                 id: table.id,
-                element: type
+                element: type,
+                x: table.x,
+                y: table.y
             });
 
             dispatch(setSelected({ id: table.id, element: type }))
         }
+
     }, [dispatch])
 
     const offset = useMemo(() => {
-
         const x = coords.current.mouseX / scale - coords.current.tableX;
         const y = coords.current.mouseY / scale - coords.current.tableY;
         return { x, y }
@@ -92,7 +99,8 @@ const Canvas: FC = () => {
         } else if (dragging.id >= 0 && dragging.element === objectType.Table) {
             const x = event.clientX / scale - offset.x,
                 y = event.clientY / scale - offset.y;
-            dispatch(updateTable({ id: selected.id, x, y }))
+            const id = selected.id as number
+            dispatch(updateTable({ id, x, y }))
         } else if (panning.isPanning && (dragging.id === -1 || dragging.element === objectType.None)) {
             dispatch(setPan(
                 {
@@ -100,7 +108,6 @@ const Canvas: FC = () => {
                     y: (event.clientY - panning.dy),
                 }
             ))
-
             setCursor('grabbing')
         }
     }
@@ -108,11 +115,36 @@ const Canvas: FC = () => {
     function onMouseUpNdLeave() {
         if (linking.isLinking) {
             handleLinking();
+        } else if (dragging.id >= 0 && dragging.element === objectType.Table) {
+            const table = tables.find(t => t.id === selected.id)
+            if (!(Math.ceil(dragging.x) === Math.ceil(table!.x) && Math.ceil(dragging.y) === Math.ceil(table!.y))) {
+                dispatch(pushUndoStack({
+                    element: {
+                        ...table,
+                        x: dragging.x,
+                        y: dragging.y,
+                    } as ITable,
+                    objectType: objectType.Table,
+                    actionType: canvasActionType.MOVE
+                }))
+                dispatch(nullRedoStack())
+            }
+        } else if (panning.isPanning && (dragging.id === -1 || dragging.element === objectType.None)) {
+            if (!(Math.ceil(oldPan.x) === Math.ceil(pan.x) && Math.ceil(oldPan.y) === Math.ceil(pan.y))) {
+                dispatch(pushUndoStack({
+                    actionType: canvasActionType.PANMOVE,
+                    objectType: objectType.None,
+                    element: { pan: { x: oldPan.x, y: oldPan.y } }
+                }))
+                dispatch(nullRedoStack())
+            }
         }
 
         setDragging({
             id: -1,
-            element: objectType.None
+            element: objectType.None,
+            x: 0,
+            y: 0
         })
         setPanning({
             isPanning: false,
@@ -137,6 +169,7 @@ const Canvas: FC = () => {
             dx: e.clientX - pan.x,
             dy: e.clientY - pan.y
         })
+        setOldPan({ x: pan.x, y: pan.y });
     }
     const onStartLinking = useCallback((data: ILinking) => {
         setLinking((prev) => ({
@@ -145,7 +178,9 @@ const Canvas: FC = () => {
         }))
         setDragging({
             id: -1,
-            element: objectType.None
+            element: objectType.None,
+            x: 0,
+            y: 0
         })
         setPanning({
             isPanning: false,
@@ -164,8 +199,8 @@ const Canvas: FC = () => {
             Toast.warning('Cannot connect field with same table.')
             return;
         }
-        const startTable = tables.find(t => t.id === linking.startTableId)
-        const endTable = tables.find(t => t.id === hoveredTable.tid);
+        const startTable = tables.find(t => t.id === linking.startTableId)!
+        const endTable = tables.find(t => t.id === hoveredTable.tid)!;
         if (startTable!.fields[linking.startTableField!].type !== endTable!.fields[hoveredTable.fid].type) {
             Toast.warning('Cannot connect field with different types.')
             return;
@@ -176,16 +211,21 @@ const Canvas: FC = () => {
             endTableField: hoveredTable.fid,
             endTableId: hoveredTable.tid,
             connectionType: connectionType.ONE_TO_ONE,
-            connectionName: `${startTable!.name}-${endTable!.name}`
+            connectionName: `${startTable.name}_${startTable.fields[linking.startTableField!].name}-${endTable.name}_${endTable.fields[hoveredTable.fid].name}`
         }
         if (relationExist(relations, newRelation)) {
             Toast.warning('Relation already exist.')
             return;
         }
-
+        dispatch(pushUndoStack({
+            element: newRelation,
+            objectType: objectType.Relation,
+            actionType: canvasActionType.ADD
+        }))
+        dispatch(nullRedoStack())
         dispatch(addRelation(newRelation))
     }
-
+    console.log(relations)
 
     useEffect(() => {
         function onMouseWheel(event: WheelEvent) {
@@ -203,6 +243,8 @@ const Canvas: FC = () => {
             xmlns="http://www.w3.org/2000/svg"
             width="100%"
             height="100%"
+            onTouchEnd={onMouseUpNdLeave}
+            onTouchCancel={onMouseUpNdLeave}
             onMouseDown={onMouseDown}
             onMouseMove={onMouseMove}
             onMouseUp={onMouseUpNdLeave}
@@ -213,7 +255,7 @@ const Canvas: FC = () => {
             }}
             ref={canvasRef}
         >
-            <defs>
+            {showGrid && <defs>
                 <pattern
                     x={0}
                     y={0}
@@ -231,7 +273,7 @@ const Canvas: FC = () => {
                         id="pattern-circle">
                     </circle>
                 </pattern>
-            </defs>
+            </defs>}
             <rect fill='url(#canvas-bg)' width={'100%'} height={'100%'}></rect>
             <g
                 style={{
@@ -240,18 +282,21 @@ const Canvas: FC = () => {
                 }}
                 id="diagram"
             >
-                {relations.map((r, i) => <Relation key={i} data={r} />)}
+                {relations.map((r) => <Relation key={r.connectionName} data={r} />)}
+
                 <Tables
                     onMouseDownOnElement={onMouseDownOnElement}
                     onStartLinking={onStartLinking}
                     setHoveredTable={setHoveredTable}
                     tables={tables} />
-
-                {linking.isLinking && <path d={`M ${linking.startX} ${linking.startY} L ${linking.endX!} ${linking.endY}`} strokeDasharray="10" fill="none" stroke="red" strokeWidth='2px' />}
+                {linking.isLinking && <path d={`M ${linking.startX} ${linking.startY} L ${linking.endX} ${linking.endY}`} strokeDasharray="10" fill="none" stroke="red" strokeWidth='2px' />}
             </g>
         </svg>
     </>
     );
-};
+});
 
 export default Canvas;
+
+
+

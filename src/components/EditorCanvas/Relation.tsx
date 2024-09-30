@@ -1,7 +1,8 @@
 import { tableDefaultRowHeight, tableDefaultWidth, tableHeaderHeight } from "@/Constants/constants";
-import { connectionType } from "@/Constants/enums";
+import { connectionType, objectType } from "@/Constants/enums";
 import { ITableRelation } from "@/Types/table";
-import { useAppSelector } from "@/redux-hooks";
+import { useAppDispatch, useAppSelector } from "@/redux-hooks";
+import { setSelected } from "@/store/selected";
 import { calcPath } from "@/utiles/calckPath";
 import { FC, useEffect, useRef, useState } from "react";
 interface IRelation {
@@ -10,8 +11,13 @@ interface IRelation {
 
 const Relation: FC<IRelation> = ({ data }) => {
     const { tables } = useAppSelector(state => state.tables);
+    const { selected } = useAppSelector(state => state.selected);
+    const showCardinality = useAppSelector(state => state.settings.showCardinality);
+    const dispatch = useAppDispatch();
+
     const table1 = tables.find(t => t.id === data.startTableId)!
     const table2 = tables.find(t => t.id === data.endTableId)!
+    const isSelected = data.connectionName === selected.id;
     const relationRef = useRef<SVGPathElement>(null);
     const circleRadius = 10;
     const [circlesCoords, setCirclesCoords] = useState({
@@ -21,6 +27,7 @@ const Relation: FC<IRelation> = ({ data }) => {
         y2: 0
     })
     const [fromText, toText] = getRelationType(data.connectionType);
+
     useEffect(() => {
         if (!relationRef.current) return;
 
@@ -36,13 +43,21 @@ const Relation: FC<IRelation> = ({ data }) => {
         })
     }, [tables])
 
+    function handleRelationClick() {
+        dispatch(setSelected({
+            id: data.connectionName,
+            element: objectType.Relation
+        }))
+    }
+
     return (
         <g
             className="select-none group hover:cursor-pointer"
+            onClick={handleRelationClick}
         >
             <path
                 ref={relationRef}
-                className="group-hover:stroke-sky-700"
+                className={`group-hover:stroke-sky-700 ${isSelected ? 'stroke-sky-700' : ''}`}
                 d={calcPath({
                     width: tableDefaultWidth,
                     x1: table1.x,
@@ -50,10 +65,14 @@ const Relation: FC<IRelation> = ({ data }) => {
                     y1: table1.y + tableHeaderHeight + ((data.startTableField * tableDefaultRowHeight) + tableDefaultRowHeight) - tableDefaultRowHeight / 2,
                     y2: table2.y + tableHeaderHeight + ((data.endTableField * tableDefaultRowHeight) + tableDefaultRowHeight) - tableDefaultRowHeight / 2
                 })} strokeWidth='2px' stroke="gray" fill="none" />
-            <circle className="group-hover:fill-sky-700" cx={circlesCoords.x1} cy={circlesCoords.y1} r={circleRadius} stroke="none" fill="gray" />
-            <text x={circlesCoords.x1} y={circlesCoords.y1} fill="white" textAnchor="middle" dominantBaseline='middle'>{fromText}</text>
-            <circle className="group-hover:fill-sky-700" cx={circlesCoords.x2} cy={circlesCoords.y2} r={circleRadius} stroke="none" fill="gray" />
-            <text x={circlesCoords.x2} y={circlesCoords.y2} fill="white" textAnchor="middle" dominantBaseline='middle'>{toText}</text>
+
+            {showCardinality && (<>
+
+                <circle className={`group-hover:fill-sky-700 ${isSelected ? 'fill-sky-700' : ''}`} cx={circlesCoords.x1} cy={circlesCoords.y1} r={circleRadius} stroke="none" fill="gray" />
+                <text x={circlesCoords.x1} y={circlesCoords.y1} fill="white" textAnchor="middle" dominantBaseline='middle'>{fromText}</text>
+                <circle className={`group-hover:fill-sky-700 ${isSelected ? 'fill-sky-700' : ''}`} cx={circlesCoords.x2} cy={circlesCoords.y2} r={circleRadius} stroke="none" fill="gray" />
+                <text x={circlesCoords.x2} y={circlesCoords.y2} fill="white" textAnchor="middle" dominantBaseline='middle'>{toText}</text>
+            </>)}
         </g>
     );
 };

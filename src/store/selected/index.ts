@@ -1,15 +1,13 @@
 import { objectType } from "@/Constants/enums";
-import { createSlice } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 interface ISelected {
     selected: {
-        id: number,
+        id: number | string,
         element: objectType
     }
 }
-interface ISetSelected {
-    payload: Partial<ISelected> & { id: number, element: objectType }
-}
+type ISetSelected = Partial<ISelected> & { id: number | string, element: objectType }
 
 const initialState: ISelected = {
     selected: {
@@ -22,8 +20,8 @@ const selectedSlice = createSlice({
     name: 'selected',
     initialState,
     reducers: {
-        setSelected(state, { payload }: ISetSelected) {
-            state.selected = { ...state.selected, ...payload }
+        setSelected(state, action: PayloadAction<ISetSelected>) {
+            state.selected = { ...state.selected, ...action.payload }
         },
         nullSelected(state) {
             state.selected = { ...initialState.selected }
