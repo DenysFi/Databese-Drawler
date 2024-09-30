@@ -124,6 +124,7 @@ const tablesSlice = createSlice({
             const { id, ...values } = action.payload;
             state.tables = state.tables.map(t => t.id === id ? { ...t, ...values } : t);
         },
+        // @ts-expect-error  @ts-ignore (will be fixed in the next step)
         updateField(state, action) {
 
         },

@@ -4,7 +4,7 @@ export function requestFullScreen() {
     const root = document.body;
 
     if (!document.fullscreenElement) {
-        root.requestFullscreen().catch((err) => {
+        root.requestFullscreen().catch(() => {
             Toast.error(
                 `Error attempting to enable fullscreen mode.)`,
             );
